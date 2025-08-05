@@ -11,11 +11,11 @@ export const userRegistration = async (req: Request, res: Response, next: NextFu
 
     const existingUser = await prisma.users.findUnique({ where: email });
 
-    if(existingUser){
-        return next(new ValidationError ("User already exists with this email!"))
+    if (existingUser) {
+        return next(new ValidationError("User already exists with this email!"))
     }
 
-    // await 
+    await checkOtpRestrictions(email, next) 
 
 
 }
