@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import errorMiddleware from '../../../packages/error-handler/error-handler';
 import cookieParser from 'cookie-parser';
+import router from './routes/auth.router';
 
 
 
@@ -14,9 +15,15 @@ app.use(cors({
 }))
 app.use(express.json())
 app.use(cookieParser())
+
 app.get('/', (req, res) => {
     res.send({ 'message': 'Hello API' });
 });
+
+
+
+//routes 
+app.use("/api", router)
 
 
 app.use(errorMiddleware)

@@ -6,7 +6,6 @@ import rateLimit from 'express-rate-limit';
 import swaggerUi from "swagger-ui-express"
 import axios from 'axios';
 import cookieParser from 'cookie-parser';
-import { error } from 'console';
 import { ipKeyGenerator } from 'express-rate-limit';
 
 
@@ -42,6 +41,6 @@ app.use("/", proxy("http://localhost:6001"))
 
 const port = process.env.PORT || 8080;
 const server = app.listen(port, () => {
-  console.log(`Listening at http://localhost:${port}/api`);
+  console.log(`Listening at http://localhost:${port}`);
 });
 server.on('error', console.error);
