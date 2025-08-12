@@ -3,7 +3,6 @@ import cors from 'cors';
 import proxy from 'express-http-proxy';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
-import swaggerUi from "swagger-ui-express"
 import axios from 'axios';
 import cookieParser from 'cookie-parser';
 import { ipKeyGenerator } from 'express-rate-limit';
@@ -33,7 +32,9 @@ const limiter = rateLimit({
 
 app.use(limiter)
 
-app.get('/gateway-health', (req, res) => {
+import { Request, Response } from 'express';
+
+app.get('/gateway-health', (req: Request, res: Response) => {
   res.send({ message: 'Welcome to api-gateway!' });
 });
 

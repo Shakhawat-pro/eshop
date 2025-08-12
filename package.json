@@ -3,13 +3,15 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "dev": "npx nx run-many --target=serve --all"
+    "dev": "npx nx run-many --target=serve --all",
+    "prisma:generate": "npx prisma generate"
   },
   "private": true,
   "dependencies": {
     "@prisma/client": "^6.13.0",
     "@upstash/redis": "^1.35.3",
     "axios": "^1.11.0",
+    "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
@@ -17,10 +19,9 @@
     "express": "^4.21.2",
     "express-http-proxy": "^2.1.1",
     "express-rate-limit": "^8.0.1",
+    "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.1",
-    "nodemailer": "^7.0.5",
-    "swagger-autogen": "^2.23.7",
-    "swagger-ui-express": "^5.0.1"
+    "nodemailer": "^7.0.5"
   },
   "devDependencies": {
     "@nx/esbuild": "21.3.11",
@@ -37,16 +38,17 @@
     "@swc/core": "~1.5.7",
     "@swc/helpers": "~0.5.11",
     "@swc/jest": "~0.2.38",
+    "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.19",
     "@types/ejs": "^3.1.5",
-    "@types/express": "^4.17.21",
+    "@types/express": "^4.17.23",
     "@types/express-http-proxy": "^1.6.7",
     "@types/jest": "^30.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
-    "@types/node": "~18.16.9",
+    "@types/node": "^24.2.1",
     "@types/nodemailer": "^6.4.17",
-    "@types/swagger-ui-express": "^4.1.8",
     "esbuild": "^0.19.2",
     "jest": "^30.0.2",
     "jest-environment-node": "^30.0.2",
@@ -61,6 +63,7 @@
     "webpack-cli": "^5.1.4"
   },
   "workspaces": [
-    "apps/*"
+    "apps/*",
+    "packages/*"
   ]
 }
