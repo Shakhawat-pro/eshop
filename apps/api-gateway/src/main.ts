@@ -3,7 +3,7 @@ import cors from 'cors';
 import proxy from 'express-http-proxy';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
-import axios from 'axios';
+// import axios from 'axios';
 import cookieParser from 'cookie-parser';
 import { ipKeyGenerator } from 'express-rate-limit';
 

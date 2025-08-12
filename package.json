@@ -4,7 +4,17 @@
   "license": "MIT",
   "scripts": {
     "dev": "npx nx run-many --target=serve --all",
-    "prisma:generate": "npx prisma generate"
+    "dev:development": "npx nx run-many --target=serve --all --configuration=development",
+    "build": "npx nx run-many --target=build --all --configuration=production",
+    "serve:api-gateway": "nx serve @eshop/api-gateway --configuration=development",
+    "serve:auth-service": "nx serve @eshop/auth-service --configuration=development",
+    "serve:api-gateway:prod": "nx serve @eshop/api-gateway --configuration=production",
+    "serve:auth-service:prod": "nx serve @eshop/auth-service --configuration=production",
+    "build:api-gateway": "nx build @eshop/api-gateway --configuration=production",
+    "build:auth-service": "nx build @eshop/auth-service --configuration=production",
+    "prisma:generate": "npx prisma generate",
+    "lint": "nx lint",
+    "test": "nx test"
   },
   "private": true,
   "dependencies": {

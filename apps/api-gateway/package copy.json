@@ -1,0 +1,56 @@
+{
+  "name": "@eshop/api-gateway",
+  "version": "0.0.1",
+  "private": true,
+  "nx": {
+    "targets": {
+      "build": {
+        "executor": "@nx/esbuild:esbuild",
+        "outputs": ["{options.outputPath}"],
+        "defaultConfiguration": "production",
+        "options": {
+          "platform": "node",
+          "outputPath": "dist/apps/api-gateway",
+          "format": ["cjs"],
+          "bundle": false,
+          "main": "apps/api-gateway/src/main.ts",
+          "tsConfig": "apps/api-gateway/tsconfig.app.json",
+          "assets": ["apps/api-gateway/src/assets"],
+          "esbuildOptions": {
+            "sourcemap": true
+          }
+        },
+        "configurations": {
+          "development": {
+            "esbuildOptions": {
+              "sourcemap": true
+            }
+          },
+          "production": {
+            "esbuildOptions": {
+              "sourcemap": false
+            }
+          }
+        }
+      },
+      "serve": {
+        "executor": "@nx/js:node",
+        "defaultConfiguration": "development",
+        "dependsOn": ["build"],
+        "options": {
+          "buildTarget": "@eshop/api-gateway:build",
+          "runBuildTargetDependencies": false,
+          "inspect": false
+        },
+        "configurations": {
+          "development": {
+            "buildTarget": "@eshop/api-gateway:build:development"
+          },
+          "production": {
+            "buildTarget": "@eshop/api-gateway:build:production"
+          }
+        }
+      }
+    }
+  }
+}
