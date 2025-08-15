@@ -1,12 +1,14 @@
 import { NextFunction, Request, Response } from "express";
-import { checkOtpRestrictions, sendOtp, trackOtpRequests, validateRegistrationData, verifyOtp } from "../utils/auth.helper";
+import { checkOtpRestrictions, handleForgetPassword, sendOtp, trackOtpRequests, validateRegistrationData, verifyForgotPasswordOtp, verifyOtp } from "../utils/auth.helper";
 import bcrypt from "bcrypt"
 import prisma from "../../../../packages/libs/prisma";
 import { AuthError, ValidationError } from "../../../../packages/error-handler";
 import Jwt from "jsonwebtoken";
 import { setCookie } from "../utils/cookies/setCoookie";
+
+
 // Register a new user
-export const userRegistration = async (req: Request, res: Response, next: NextFunction) => {
+const userRegistration = async (req: Request, res: Response, next: NextFunction) => {
     try {
         validateRegistrationData(req.body, "user")
         const { name, email } = req.body
@@ -30,7 +32,7 @@ export const userRegistration = async (req: Request, res: Response, next: NextFu
 };
 
 // verify user with otp
-export const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
+const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { email, otp, name, password } = req.body;
         if (!email || !otp || !name || !password) {
@@ -65,7 +67,7 @@ export const verifyUser = async (req: Request, res: Response, next: NextFunction
 }
 
 // login user
-export const LoginUser = async (req: Request, res: Response, next: NextFunction) => {
+const LoginUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { email, password } = req.body;
 
@@ -115,4 +117,62 @@ export const LoginUser = async (req: Request, res: Response, next: NextFunction)
     } catch (error) {
         return next(error)
     }
+}
+
+// user forgot password
+const userForgotPassword = async (req: Request, res: Response, next: NextFunction) => {
+    await handleForgetPassword(req, res, next, "user")
+}
+
+// Verify forgot password otp
+const verifyForgotPassword = async (req: Request, res: Response, next: NextFunction) => {
+    await verifyForgotPasswordOtp(req, res, next ,)
+}
+
+// reset user password 
+const resetUserPassword = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return next(new ValidationError("Email and password are required!"));
+        }
+
+        const user = await prisma.users.findUnique({ where: { email } })
+        if (!user) return next(new ValidationError("User not found!"));
+
+        // compare new password with the existing one
+        const isSamePass = await bcrypt.compare(password, user.password!)
+
+        if (isSamePass) {
+            return next(new ValidationError("New password must be different from the old password!"));
+        }
+
+        // hash the new password
+        const hashedPassword = await bcrypt.hash(password, 10)
+
+        await prisma.users.update({
+            where: { email },
+            data: { password: hashedPassword }
+        })
+
+        res.status(200).json({
+            success: true,
+            message: "Password reset successfully!"
+        })
+
+    } catch (error) {
+        return next(error)
+    }
+
+}
+
+
+export const authController = {
+    userRegistration,
+    verifyUser,
+    LoginUser,
+    userForgotPassword,
+    verifyForgotPassword,
+    resetUserPassword
 }
