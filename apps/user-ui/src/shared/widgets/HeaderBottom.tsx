@@ -40,7 +40,7 @@ const HeaderBottom = ({ pathname }: HeaderBottomProps) => {
 
     const isActive = (p: string) => pathname === p;
     return (
-        <div className={`w-full  py-3 shadow-sm bg-gray-100`}>
+        <div className={`w-full  py-3 shadow-sm `}>
             <div className="w-11/12 sm:w-[80%] mx-auto flex items-center justify-between relative" ref={wrapperRef}>
                 <div className="flex items-center gap-4">
                     <div className="relative">

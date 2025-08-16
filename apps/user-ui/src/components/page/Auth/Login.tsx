@@ -1,0 +1,158 @@
+"use client";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { Eye, EyeOff } from "lucide-react"; // for password toggle icon
+import { FcGoogle } from "react-icons/fc"; // for Google icon
+
+type FormData = {
+    email: string;
+    password: string;
+};
+
+const Login = () => {
+    const [passwordVisible, setPasswordVisible] = useState(false);
+    const [serverError, setServerError] = useState("");
+    const [rememberMe, setRememberMe] = useState(false);
+    const router = useRouter();
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<FormData>();
+
+    const onSubmit = async (data: FormData) => {
+        try {
+            console.log("Login data:", data, rememberMe);
+            // login API logic here
+            router.push("/"); // redirect after login
+        } catch (error) {
+            setServerError("Login failed. Please try again.");
+        }
+    };
+
+    return (
+        <div className="w-full py-10 min-h-[85vh] bg-gradient-to-br from-gray-50 to-gray-200 rounded-xl flex flex-col gap-4 items-center justify-center">
+            <div className="text-center space-y-3">
+                <h1 className="text-4xl text-gray-900 font-bold">Login</h1>
+                <p className="text-gray-600 font-semibold">Home . Login</p>
+            </div>
+            <div className="max-w-md w-full p-8 bg-white shadow-lg rounded-2xl">
+                <h1 className="text-2xl font-bold text-center text-gray-900  ">
+                    Welcome Back to E-Shop
+                </h1>
+                <p className="text-center text-gray-500 mt-1">Login to continue</p>
+
+                {/* Error Message */}
+                {serverError && (
+                    <p className="text-red-500 text-center mt-3">{serverError}</p>
+                )}
+
+                {/* Form */}
+                <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-5">
+                    {/* Email */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-600">
+                            Email
+                        </label>
+                        <input
+                            type="email"
+                            placeholder="Enter your email"
+                            {...register("email", { required: "Email is required" })}
+                            className="mt-1 w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        {errors.email && (
+                            <p className="text-red-500 text-sm mt-1">
+                                {errors.email.message}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Password */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-600">
+                            Password
+                        </label>
+                        <div className="relative mt-1">
+                            <input
+                                type={passwordVisible ? "text" : "password"}
+                                placeholder="Enter your password"
+                                {...register("password", { required: "Password is required" })}
+                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setPasswordVisible((prev) => !prev)}
+                                className="absolute inset-y-0 right-3 flex items-center text-gray-500"
+                            >
+                                {passwordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                        </div>
+                        {errors.password && (
+                            <p className="text-red-500 text-sm mt-1">
+                                {errors.password.message}
+                            </p>
+                        )}
+                    </div>
+
+                    {/* Remember Me + Forgot Password */}
+                    <div className="flex items-center justify-between text-sm">
+                        <label className="flex items-center gap-2">
+                            <input
+                                type="checkbox"
+                                checked={rememberMe}
+                                onChange={(e) => setRememberMe(e.target.checked)}
+                                className="rounded"
+                            />
+                            Remember me
+                        </label>
+                        <button
+                            type="button"
+                            className="text-blue-600 hover:underline"
+                            onClick={() => router.push("/forgot-password")}
+                        >
+                            Forgot password?
+                        </button>
+                    </div>
+
+                    {/* Submit */}
+                    <button type="submit" className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg font-medium  transition"
+                    >
+                        Login
+                    </button>
+                </form>
+
+                {/* Divider */}
+                <div className="flex items-center my-6">
+                    <hr className="flex-grow border-gray-300" />
+                    <span className="px-3 text-gray-500 text-sm">OR</span>
+                    <hr className="flex-grow border-gray-300" />
+                </div>
+
+                {/* Google Login */}
+                <button
+                    type="button"
+                    className="w-full flex items-center justify-center gap-2 border py-2 rounded-lg hover:bg-gray-50 transition"
+                >
+                    <FcGoogle size={20} />
+                    Continue with Google
+                </button>
+
+                {/* Sign up link */}
+                <p className="text-center text-gray-600 text-sm mt-6">
+                    Don’t have an account?{" "}
+                    <button
+                        type="button"
+                        className="text-black font-medium hover:underline"
+                        onClick={() => router.push("/register")}
+                    >
+                        Sign up
+                    </button>
+                </p>
+            </div>
+        </div>
+    );
+};
+
+export default Login;

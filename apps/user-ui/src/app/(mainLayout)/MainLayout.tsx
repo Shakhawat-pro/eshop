@@ -8,8 +8,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
     return (
         <>
             <Header />
-            <main id="main-content" className="min-h-screen w-full mt-20">
-                <div className="w-11/12 sm:w-[80%] mx-auto py-6">
+            <main id="main-content" className="min-h-[50vh]">
+                <div className="">
                     {children}
                 </div>
             </main>

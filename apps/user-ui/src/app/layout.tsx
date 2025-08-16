@@ -1,4 +1,3 @@
-import Header from '@/shared/widgets/Header';
 import './global.css';
 import { Poppins, Roboto } from "next/font/google";
 import MainLayout from './(mainLayout)/MainLayout';

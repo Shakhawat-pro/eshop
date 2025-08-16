@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import logo from "@/assets/logo.png";
 import Image from "next/image";
+import ThemeToggle from './ThemeToggle';
 
 const Header = () => {
     const pathname = usePathname();
@@ -23,7 +24,7 @@ const Header = () => {
 
     return (
         <>
-            <header className={`fixed top-0 left-0 right-0 z-40 transition-[background-color,box-shadow,backdrop-filter] duration-300 bg-white ${isSticky ? 'shadow-md backdrop-blur-sm bg-white/90' : 'shadow-sm'}`}>
+            <header className={`sticky top-0 z-10 transition-[background-color,box-shadow,backdrop-filter] duration-300 bg-white ${isSticky ? ' shadow-md backdrop-blur-sm bg-white/90' : 'shadow-sm'}`}>
                 <div className={`w-11/12 sm:w-[80%] mx-auto flex items-center justify-between gap-4 transition-all duration-300 ${isSticky ? 'h-16 py-3' : 'h-20 py-5'}`}>
                     <Link href={"/"} className="flex items-center justify-center select-none">
                         <Image
@@ -33,7 +34,7 @@ const Header = () => {
                             height={35}
                             className="border-black"
                         />
-                        <h1 className="text-3xl text-black font-bold tracking-tight ml-2 max-md:hidden block">
+                        <h1 className="text-3xl text-black font-bold tracking-tight ml-2 max-md:hidden block text-nowrap ">
                             <span className=""
                                 style={{
                                     background: 'linear-gradient(to right, #ff6a00, #ff8c00)',
@@ -44,7 +45,7 @@ const Header = () => {
                         </h1>
                     </Link>
 
-                    <div className="w-[45%] relative hidden md:block">
+                    <div className="max-w-[45%] ml-4 w-full relative hidden md:block">
                         <input
                             type="text"
                             placeholder="Search for products..."
@@ -52,12 +53,12 @@ const Header = () => {
                         />
                         <button
                             aria-label="Search"
-                            className="w-[60px] h-full cursor-pointer flex items-center justify-center absolute right-0 top-0 bg-[#3483ff] rounded-r-md hover:bg-blue-600 transition-colors"
+                            className="max-w-[60px] w-full h-full cursor-pointer flex items-center justify-center absolute right-0 top-0 bg-[#3483ff] rounded-r-md hover:bg-blue-600 transition-colors"
                         >
                             <Search className="text-white" />
                         </button>
                     </div>
-                    <div className="flex items-center gap-5">
+                    <div className="flex items-center gap-4">
                         <Link
                             href={"/login"}
                             className="hidden sm:block text-left leading-tight"
@@ -65,8 +66,8 @@ const Header = () => {
                             <span className="block text-xs text-gray-500">
                                 Hello{pathname === "/profile" ? ", User" : ","}
                             </span>
-                            <span className="font-semibold text-sm hover:text-blue-600 transition-colors">
-                                {pathname === "/login" ? "Signing In..." : "Sign in"}
+                            <span className="font-semibold text-sm hover:text-blue-600 transition-colors whitespace-nowrap">
+                               Sign In
                             </span>
                         </Link>
                         <Link
@@ -129,14 +130,14 @@ const Header = () => {
                                 0
                             </span>
                         </Link>
+                        <ThemeToggle />
                     </div>
                 </div>
-                <div className="border-b border-gray-200">
+                <div className="border-y border-gray-200">
                     <HeaderBottom pathname={pathname} />
                 </div>
             </header>
-            {/* Spacer to prevent content jump; matches dynamic header height */}
-            <div aria-hidden className={`${isSticky ? 'h-16' : 'h-20'} w-full`} />
+
         </>
     );
 };

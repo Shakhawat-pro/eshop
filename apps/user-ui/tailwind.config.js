@@ -9,6 +9,11 @@ module.exports = {
   ],
   theme: {
     extend: {
+      colors: {
+        brand: {
+
+        },
+      },
       fontFamily: {
         Roboto: ["var(--font-roboto)"],
         Poppins: ["var(--font-poppins)"],
