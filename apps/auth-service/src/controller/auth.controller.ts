@@ -43,9 +43,11 @@ const verifyUser = async (req: Request, res: Response, next: NextFunction) => {
         if (existingUser) {
             return next(new ValidationError("User already exists with this email!"));
         }
+        console.log("verifying otp for", { email, otp, name, password });
+
 
         await verifyOtp(email, otp, next)
-        const hashedPassword = await bcrypt.hash(password, 10)
+        const hashedPassword = await bcrypt.hash(String(password), 10)
 
         const user = await prisma.users.create({
             data: {
@@ -79,7 +81,14 @@ const LoginUser = async (req: Request, res: Response, next: NextFunction) => {
 
         if (!user) return next(new AuthError("User does not exist!"));
 
-        const isPasswordValid = await bcrypt.compare(password, user.password!)
+        console.log("User :", user);
+        console.log("attempting login for", { email, password });
+        
+
+        const isPasswordValid = await bcrypt.compare(password, user.password!);
+
+        console.log(isPasswordValid);
+        
 
         if (!isPasswordValid) {
             return next(new AuthError("Invalid password!"));
@@ -126,7 +135,7 @@ const userForgotPassword = async (req: Request, res: Response, next: NextFunctio
 
 // Verify forgot password otp
 const verifyForgotPassword = async (req: Request, res: Response, next: NextFunction) => {
-    await verifyForgotPasswordOtp(req, res, next ,)
+    await verifyForgotPasswordOtp(req, res, next,)
 }
 
 // reset user password 

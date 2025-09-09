@@ -7,17 +7,25 @@ import React, { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import logo from "@/assets/logo.png";
 import Image from "next/image";
-import ThemeToggle from './ThemeToggle';
 
 const Header = () => {
     const pathname = usePathname();
+    const ENTER_THRESHOLD = 100; // start sticking after this
+    const EXIT_THRESHOLD = 80;   // stop sticking when scrolling back above this point
+
     const [isSticky, setIsSticky] = useState(false);
 
     useEffect(() => {
         const handleScroll = () => {
-            setIsSticky(window.scrollY > 100);
+            const y = window.scrollY;
+            setIsSticky(prev =>
+                prev
+                    ? y > EXIT_THRESHOLD   // remain sticky until clearly above exit threshold
+                    : y > ENTER_THRESHOLD  // only enter after higher threshold
+            );
         };
         window.addEventListener('scroll', handleScroll, { passive: true });
+        handleScroll(); // initialize
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
@@ -32,7 +40,7 @@ const Header = () => {
                             alt="E-Shop"
                             width={50}
                             height={35}
-                            className="border-black"
+                            className="h-auto w-auto"
                         />
                         <h1 className="text-3xl text-black font-bold tracking-tight ml-2 max-md:hidden block text-nowrap ">
                             <span className=""
@@ -67,7 +75,7 @@ const Header = () => {
                                 Hello{pathname === "/profile" ? ", User" : ","}
                             </span>
                             <span className="font-semibold text-sm hover:text-blue-600 transition-colors whitespace-nowrap">
-                               Sign In
+                                Sign In
                             </span>
                         </Link>
                         <Link
@@ -130,7 +138,6 @@ const Header = () => {
                                 0
                             </span>
                         </Link>
-                        <ThemeToggle />
                     </div>
                 </div>
                 <div className="border-y border-gray-200">

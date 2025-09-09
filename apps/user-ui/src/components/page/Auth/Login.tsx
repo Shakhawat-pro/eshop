@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Eye, EyeOff } from "lucide-react"; // for password toggle icon
 import { FcGoogle } from "react-icons/fc"; // for Google icon
+import { useMutation } from "@tanstack/react-query";
+import axios, { AxiosError } from "axios";
 
 type FormData = {
     email: string;
@@ -22,18 +24,27 @@ const Login = () => {
         formState: { errors },
     } = useForm<FormData>();
 
-    const onSubmit = async (data: FormData) => {
-        try {
-            console.log("Login data:", data, rememberMe);
-            // login API logic here
-            router.push("/"); // redirect after login
-        } catch (error) {
-            setServerError("Login failed. Please try again.");
+    const loginMutation = useMutation({
+        mutationFn: async (data: FormData) => {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/login-user`, data, { withCredentials: true });
+            return response.data;
+        },
+        onSuccess: () => {
+            router.push("/");
+        },
+        onError: (error: AxiosError<{ message?: string }>) => {
+            setServerError(error.response?.data?.message || "Login failed. Please try again.");
         }
+    });
+
+    const onSubmit = async (data: FormData) => {
+        setServerError("");
+        console.log("Login data:", data, rememberMe);
+        loginMutation.mutate(data);
     };
 
     return (
-        <div className="w-full py-10 min-h-[85vh] bg-gradient-to-br from-gray-50 to-gray-200 rounded-xl flex flex-col gap-4 items-center justify-center">
+        <div className="w-full py-10 min-h-[85vh] bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl flex flex-col gap-4 items-center justify-center">
             <div className="text-center space-y-3">
                 <h1 className="text-4xl text-gray-900 font-bold">Login</h1>
                 <p className="text-gray-600 font-semibold">Home . Login</p>
@@ -59,7 +70,13 @@ const Login = () => {
                         <input
                             type="email"
                             placeholder="Enter your email"
-                            {...register("email", { required: "Email is required" })}
+                            {...register("email", {
+                                required: "Email is required",
+                                pattern: {
+                                    value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                                    message: "Invalid email address"
+                                }
+                            })}
                             className="mt-1 w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                         {errors.email && (
@@ -78,7 +95,10 @@ const Login = () => {
                             <input
                                 type={passwordVisible ? "text" : "password"}
                                 placeholder="Enter your password"
-                                {...register("password", { required: "Password is required" })}
+                                {...register("password", {
+                                    required: "Password is required",
+                                    minLength: { value: 6, message: "Password must be at least 6 characters long" }
+                                })}
                                 className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                             />
                             <button
@@ -102,7 +122,7 @@ const Login = () => {
                             <input
                                 type="checkbox"
                                 checked={rememberMe}
-                                onChange={(e) => setRememberMe(e.target.checked)}
+                                onChange={() => setRememberMe(!rememberMe)}
                                 className="rounded"
                             />
                             Remember me
@@ -117,10 +137,11 @@ const Login = () => {
                     </div>
 
                     {/* Submit */}
-                    <button type="submit" className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg font-medium  transition"
+                    <button type="submit" disabled={loginMutation.isPending} className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg font-medium  transition"
                     >
-                        Login
+                        {   loginMutation.isPending ? "Logging in..." : "Login"}
                     </button>
+                    {serverError && (<p className="text-red-500 text-sm mt-1">{serverError}</p>)}
                 </form>
 
                 {/* Divider */}
@@ -145,7 +166,7 @@ const Login = () => {
                     <button
                         type="button"
                         className="text-black font-medium hover:underline"
-                        onClick={() => router.push("/register")}
+                        onClick={() => router.push("/signup")}
                     >
                         Sign up
                     </button>

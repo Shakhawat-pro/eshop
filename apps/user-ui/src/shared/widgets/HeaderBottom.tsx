@@ -1,4 +1,5 @@
 "use client"
+import Link from 'next/link';
 import React, { useState, useRef, useEffect } from 'react';
 import { RiMenu2Line } from 'react-icons/ri';
 
@@ -82,11 +83,11 @@ const HeaderBottom = ({ pathname }: HeaderBottomProps) => {
                     </div>
                 </div>
                 <nav className="flex items-center gap-6 text-sm font-medium max-md:hidden">
-                    <a href="/home" className={`${isActive('/') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'} transition-colors`}>Home</a>
-                    <a href="/products" className={`${isActive('/products') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'} transition-colors`}>Products</a>
-                    <a href="/shops" className={`${isActive('/shops') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'} transition-colors`}>Shops</a>
-                    <a href="/offers" className={`${isActive('/offers') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'} transition-colors`}>Offers</a>
-                    <a href="/seller" className={`${isActive('/seller') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'} transition-colors`}>Become A Seller</a>   
+                    <Link href="/" className={`${isActive('/') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'} transition-colors`}>Home</Link>
+                    <Link href="/products" className={`${isActive('/products') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'} transition-colors`}>Products</Link>
+                    <Link href="/shops" className={`${isActive('/shops') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'} transition-colors`}>Shops</Link>
+                    <Link href="/offers" className={`${isActive('/offers') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'} transition-colors`}>Offers</Link>
+                    <Link href="/seller" className={`${isActive('/seller') ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'} transition-colors`}>Become A Seller</Link>
                 </nav>
             </div>
         </div>

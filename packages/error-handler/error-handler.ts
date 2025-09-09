@@ -6,6 +6,7 @@ const errorMiddleware = (err: Error, req: Request, res: Response, next: NextFunc
         console.log(`Error ${req.method} ${req.url} - ${err.message}`);
 
         return res.status(err.statusCode).json({
+            success: false,
             status: "error",
             message: err.message,
             ...(err.details && { details: err.details }),
@@ -15,6 +16,7 @@ const errorMiddleware = (err: Error, req: Request, res: Response, next: NextFunc
     console.log("Unhandled error:", err);
 
     return res.status(500).json({
+        success: false,
         status: "error",
         message: "Something went wrong, please try again!",
     });
