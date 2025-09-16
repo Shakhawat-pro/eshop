@@ -193,7 +193,7 @@ const ForgotPassword = () => {
 
 
                         {/* Submit */}
-                        <button type="submit" disabled={requestOtpMutation.isPending} className="w-full bg-orange-500  hover:bg-orange-600 text-white py-2 rounded-lg font-medium  transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        <button type="submit" disabled={requestOtpMutation.isPending} className="w-full bg-orange-500   hover:bg-orange-600 text-white py-2 rounded-lg font-medium  transition disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {requestOtpMutation.isPending ? "Submitting..." : "Submit"}
                         </button>

@@ -7,13 +7,17 @@ import React, { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import logo from "@/assets/logo.png";
 import Image from "next/image";
+import useUser from "@/hooks/useUser";
 
 const Header = () => {
     const pathname = usePathname();
     const ENTER_THRESHOLD = 100; // start sticking after this
     const EXIT_THRESHOLD = 80;   // stop sticking when scrolling back above this point
-
     const [isSticky, setIsSticky] = useState(false);
+    const { user, isLoading } = useUser();
+
+    // console.log("User in header:", user);
+
 
     useEffect(() => {
         const handleScroll = () => {
@@ -57,7 +61,7 @@ const Header = () => {
                         <input
                             type="text"
                             placeholder="Search for products..."
-                            className="w-full h-[50px] border-[2.5px] border-[#3483ff] rounded-md py-2 pl-4 pr-16 font-Poppins outline-none focus:ring-2 focus:ring-blue-300 transition"
+                            className="w-full h-[50px] border-[2.5px] border-[#3483ff] rounded-md py-2 pl-4 pr-16 font-roboto outline-none focus:ring-2 focus:ring-blue-300 transition"
                         />
                         <button
                             aria-label="Search"
@@ -67,17 +71,32 @@ const Header = () => {
                         </button>
                     </div>
                     <div className="flex items-center gap-4">
-                        <Link
-                            href={"/login"}
-                            className="hidden sm:block text-left leading-tight"
-                        >
-                            <span className="block text-xs text-gray-500">
-                                Hello{pathname === "/profile" ? ", User" : ","}
-                            </span>
-                            <span className="font-semibold text-sm hover:text-blue-600 transition-colors whitespace-nowrap">
-                                Sign In
-                            </span>
-                        </Link>
+                        {!isLoading && user ? (
+                            <Link href={"/profile"} className="hidden sm:block text-left leading-tight">
+                                <span className="block text-xs text-gray-500 text-right">
+                                    Hello{pathname === "/profile" ? ", User" : ","}
+                                </span>
+                                <span className="font-semibold text-sm hover:text-blue-600 transition-colors whitespace-nowrap font-poppins">
+                                    {["MD", "Md.", "Md", "md", "Mr.", "Mr", "Mrs.", "Mrs", "Dr.", "Dr"].includes(user?.name.split(" ")[0]) ? user?.name.split(" ")[1] : user?.name.split(" ")[0]}
+                                </span>
+                            </Link>
+                        ) : (
+                            <Link
+                                href={"/login"}
+                                className="hidden sm:block text-left leading-tight"
+                            >
+                                <span className="block text-xs text-gray-500 text-right">
+                                    Hello{pathname === "/profile" ? ", User" : ","}
+                                </span>
+                                <span className="font-semibold text-sm hover:text-blue-600 transition-colors whitespace-nowrap font-poppins">
+                                    {isLoading ? (
+                                        <span className="inline-block animate-pulse w-20 h-3.5 bg-gray-300 rounded-md"></span>
+                                    ) : (
+                                        "Sign In"
+                                    )}
+                                </span>
+                            </Link>
+                        )}
                         <Link
                             href={"/profile"}
                             className={`border-2 rounded-full border-gray-300 w-10 h-10 p-1 flex items-center justify-center hover:border-blue-500 transition-colors ${pathname === "/profile" ? "ring-2 ring-blue-300" : ""

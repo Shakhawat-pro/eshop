@@ -3,7 +3,7 @@ import { checkOtpRestrictions, handleForgetPassword, sendOtp, trackOtpRequests, 
 import bcrypt from "bcrypt"
 import prisma from "../../../../packages/libs/prisma";
 import { AuthError, ValidationError } from "../../../../packages/error-handler";
-import Jwt from "jsonwebtoken";
+import Jwt, { JsonWebTokenError } from "jsonwebtoken";
 import { setCookie } from "../utils/cookies/setCoookie";
 
 
@@ -83,32 +83,32 @@ const LoginUser = async (req: Request, res: Response, next: NextFunction) => {
 
         console.log("User :", user);
         console.log("attempting login for", { email, password });
-        
+
 
         const isPasswordValid = await bcrypt.compare(password, user.password!);
 
         console.log(isPasswordValid);
-        
+
 
         if (!isPasswordValid) {
             return next(new AuthError("Invalid password!"));
         }
 
-        // Generate access and refresh tokens
+        // Generate access and refresh tokens (payload must match middleware expectations)
         const accessToken = Jwt.sign(
-            { userId: user.id },
+            { id: user.id, role: "user" },
             process.env.ACCESS_TOKEN_SECRET! as string,
             { expiresIn: "15m" }
         );
         const refreshToken = Jwt.sign(
-            { userId: user.id },
+            { id: user.id, role: "user" },
             process.env.REFRESH_TOKEN_SECRET! as string,
             { expiresIn: "1d" }
         );
 
         // store the refresh and access token in an httpOnly cookie
-        setCookie(res, "refreshToken", refreshToken)
-        setCookie(res, "accessToken", accessToken)
+        setCookie(res, "refresh_token", refreshToken)
+        setCookie(res, "access_token", accessToken)
 
         res.status(200).json({
             success: true,
@@ -125,6 +125,64 @@ const LoginUser = async (req: Request, res: Response, next: NextFunction) => {
 
     } catch (error) {
         return next(error)
+    }
+}
+
+// refresh token
+const refreshToken = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        console.log("Refreshing token.............");
+        
+        const refreshToken = req.cookies.refresh_token
+
+        if (!refreshToken) {
+            throw new ValidationError("Unauthorized! No Refresh Token.");
+        }
+
+        const decode = Jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string) as { id: string, role: string };
+
+        if (!decode || !decode.id || !decode.role) {
+            throw new JsonWebTokenError("Forbidden! Invalid Token.")
+        }
+
+        // let account;
+        // if(decode.role === "user")
+
+        const user = await prisma.users.findUnique({ where: { id: decode.id } })
+
+        if (!user) {
+            throw new AuthError("Forbidden! User/Seller not found")
+        }
+
+        const newAccessToken = Jwt.sign(
+            { id: user.id, role: "user" },
+            process.env.ACCESS_TOKEN_SECRET as string,
+            { expiresIn: "15m" }
+        )
+
+        setCookie(res, "access_token", newAccessToken)
+
+        return res.status(201).json({
+            success: true,
+            message: "Access token refreshed successfully!",
+        })
+    } catch (error) {
+        return next(error)
+    }
+}
+
+// get logged in user
+const getUser = async (req: any, res: Response, next: NextFunction) => {
+    try {
+        const user = req.user;
+
+        res.status(200).json({
+            success: true,
+            user
+        })
+
+    } catch (error) {
+        next(error)
     }
 }
 
@@ -181,6 +239,8 @@ export const authController = {
     userRegistration,
     verifyUser,
     LoginUser,
+    refreshToken,
+    getUser,
     userForgotPassword,
     verifyForgotPassword,
     resetUserPassword
