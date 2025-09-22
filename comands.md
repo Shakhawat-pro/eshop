@@ -41,6 +41,8 @@ nx build <app-name>
 # Run tests
 nx test <app-name>
 
+nx g @nx/next:app apps/my-new-app
+
 
 # Clear npm cache
 npm cache clean --force

@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "npx nx run-many --target=serve --all",
     "user-ui": "npx nx run @eshop/user-ui:dev",
+    "seller-ui": "npx nx run @eshop/seller-ui:dev",
     "user-ui-test": "npx nx run-many --target=dev --all --projects=@eshop/user-ui",
     "dev:development": "npx nx run-many --target=serve --all --configuration=development",
     "build": "npx nx run-many --target=build --all --configuration=production",
