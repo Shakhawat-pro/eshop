@@ -59,6 +59,7 @@ export const sendOtp = async (name: string, email: string, template: string) => 
         "user-activation-email": "Verify Your Email",
         "forgot-password-user-email": "Reset Your Password",
         "forgot-password-seller-email": "Reset Your Password",
+        "seller-activation-email": "Verify Your Email"
         // add more templates here
     };
     await sendEmail(email, templateSubjects[template], template, { name, otp })
@@ -106,8 +107,7 @@ export const handleForgetPassword = async (req: Request, res: Response, next: Ne
         }
 
         // Find user/seller in DB
-        const user = userType === "user" && await prisma.users.findUnique({ where: { email } })
-        // || userType === "seller" && await prisma.sellers.findUnique({ where: { email } });
+        const user = userType === "user" ? await prisma.users.findUnique({ where: { email }, select: { id: true, name: true } }) : await prisma.sellers.findUnique({ where: { email }, select: { id: true, name: true } });
 
         if (!user) throw new ValidationError(`${userType.charAt(0).toUpperCase() + userType.slice(1)} not found with this email!`);
         // if (!user) throw new ValidationError("User not found with this email!");
