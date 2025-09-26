@@ -25,9 +25,7 @@ export const checkOtpRestrictions = async (email: string, next: NextFunction) =>
     if (await redis.get(`otp_lock:${email}`)) {
         throw new ValidationError("Account Locked due to multiple failed attempts! Try again after 30 minutes");
     };
-    // if (await redis.get(`otp_spam_lock:${email}`)) {
-    //     throw next(new ValidationError("Too many OTP Requests ! Please wait 30 minutes before Requesting again"))
-    // };
+
     const lockKey = `otp_spam_lock:${email}`;
     const ttl = await redis.ttl(lockKey); // time left in seconds
     if (ttl > 0) {
@@ -96,8 +94,6 @@ export const verifyOtp = async (email: string, otp: string, next: NextFunction) 
 
 
 }
-
-
 
 export const handleForgetPassword = async (req: Request, res: Response, next: NextFunction, userType: "user" | "seller") => {
     try {

@@ -6,6 +6,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { countries } from "@/utils/countries";
+import CreateShop from "./createShop";
 
 type FormData = {
     name: string;
@@ -16,27 +17,6 @@ type FormData = {
     confirmPassword: string
 };
 
-type ShopFormData = {
-    shop_name: string;
-    bio: string; // limit 100 words
-    address: string;
-    opening_hours: string;
-    website?: string;
-    category: string;
-};
-
-const SHOP_CATEGORIES = [
-    "Electronics",
-    "Fashion",
-    "Home & Garden",
-    "Beauty",
-    "Sports",
-    "Books",
-    "Health",
-    "Toys",
-    "Automotive",
-    "Other"
-];
 
 const Signup = () => {
     const [activeStep, setActiveStep] = useState(1);
@@ -61,29 +41,6 @@ const Signup = () => {
         formState: { errors },
     } = useForm<FormData>();
 
-    // Form for Step 2 (Shop Setup)
-    const {
-        register: registerShop,
-        handleSubmit: handleSubmitShop,
-        watch: watchShop,
-        formState: { errors: shopErrors },
-        setValue: setShopValue
-    } = useForm<ShopFormData>();
-
-    const bioValue = watchShop("bio") || "";
-    const [bioWordCount, setBioWordCount] = useState(0);
-
-    useEffect(() => {
-        const words = bioValue.trim().split(/\s+/).filter(Boolean);
-        if (words.length <= 100) {
-            setBioWordCount(words.length);
-        } else {
-            // Prevent exceeding 100 words by trimming
-            const trimmed = words.slice(0, 100).join(" ");
-            setShopValue("bio", trimmed, { shouldValidate: true });
-            setBioWordCount(100);
-        }
-    }, [bioValue, setShopValue]);
 
     const startResendTimer = () => {
         const interval = setInterval(() => {
@@ -112,9 +69,6 @@ const Signup = () => {
         }
     })
 
-    console.log("errors", signupMutation?.error);
-
-
     const verifyMutation = useMutation({
         mutationFn: async () => {
             if (!sellerData) return;
@@ -125,7 +79,7 @@ const Signup = () => {
             return response.data;
         },
         onSuccess: (data) => {
-            setSellerId(data.id);
+            setSellerId(data.seller.id);
             setActiveStep(2);
             // setShowOtp(false);
             // setSellerData(null);
@@ -133,21 +87,6 @@ const Signup = () => {
             // router.push("/login");
         }
     })
-
-    const createShopMutation = useMutation({
-        mutationFn: async (data: ShopFormData) => {
-            // Assuming an API endpoint exists - adjust as needed
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/shops`, { sellerId, ...data });
-            return response.data;
-        },
-        onSuccess: () => {
-            setActiveStep(3); // proceed to next step (e.g., connect bank)
-        }
-    });
-
-    const onCreateShop = (data: ShopFormData) => {
-        createShopMutation.mutate(data);
-    };
 
     const onSubmit = async (data: FormData) => {
         try {
@@ -190,22 +129,36 @@ const Signup = () => {
 
     }
 
-    console.log("errors", verifyMutation?.error);
+    // console.log("errors", verifyMutation?.error);
+
+    const handleConnectStripe = async () => {
+        try {
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/connect-stripe`, { sellerId });
+            console.log("Stripe connection response:", response.data);
+
+            if (response.data.url) {
+                window.location.href = response.data.url;
+            }
+
+        } catch (error) {
+            console.log("Stripe connection error:", error);
+        }
+    }
 
 
     return (
-        <div className="w-full py-10 flex flex-col items-center justify-center min-h-screen px-4">
+        <div className="w-full py-10 flex flex-col items-center  min-h-screen px-4 ">
             {/* Stepper */}
-            <div className="relative w-full max-w-3xl mx-auto mb-8 px-4 md:px-8">
+            <div className="relative w-full max-w-3xl mx-auto mb-8 px-4 md:px-8 ">
                 <div className="flex items-center justify-between relative">
                     {/* Progress Line Background */}
-                    <div className="absolute top-5 h-1 bg-gray-300" 
-                         style={{ left: '2.5rem', right: '2.5rem' }} />
-                    
+                    <div className="absolute top-5 h-1 bg-gray-300"
+                        style={{ left: '2.5rem', right: '2.5rem' }} />
+
                     {/* Progress Line Fill */}
-                    <div 
+                    <div
                         className="absolute top-5 h-1 bg-orange-500 transition-all duration-300"
-                        style={{ 
+                        style={{
                             left: '2.5rem',
                             width: `calc((100% - 5rem) * ${((activeStep - 1) / 2)})`
                         }}
@@ -483,211 +436,29 @@ const Signup = () => {
                 </>
             )}
             {activeStep === 2 && (
-                <div className="max-w-md w-full p-8 bg-white/80 backdrop-blur border border-gray-100 shadow-xl rounded-2xl">
-                    <h2 className="text-2xl font-semibold text-center text-gray-900 mb-6">Setup new shop</h2>
-                    <form onSubmit={handleSubmitShop(onCreateShop)} className="space-y-5">
-                        {/* Shop Name */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
-                            <input
-                                type="text"
-                                placeholder="Shop name"
-                                {...registerShop("shop_name", { required: "Shop name is required", minLength: { value: 2, message: "Too short" } })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition"
-                            />
-                            {shopErrors.shop_name && <p className="text-red-500 text-sm mt-1">{shopErrors.shop_name.message}</p>}
-                        </div>
-                        {/* Bio */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Bio (Max 100 words) *</label>
-                            <textarea
-                                rows={3}
-                                placeholder="Shop bio"
-                                {...registerShop("bio", { required: "Bio is required" })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg resize-y bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition"
-                            />
-                            <div className="flex justify-between mt-1 text-xs text-gray-500">
-                                <span>{bioWordCount}/100 words</span>
-                                {shopErrors.bio && <span className="text-red-500">{shopErrors.bio.message}</span>}
-                            </div>
-                        </div>
-                        {/* Address */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
-                            <input
-                                type="text"
-                                placeholder="Shop location"
-                                {...registerShop("address", { required: "Address is required" })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition"
-                            />
-                            {shopErrors.address && <p className="text-red-500 text-sm mt-1">{shopErrors.address.message}</p>}
-                        </div>
-                        {/* Opening Hours */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Opening Hours *</label>
-                            <input
-                                type="text"
-                                placeholder="e.g., Mon-Fri 9AM - 6PM"
-                                {...registerShop("opening_hours", { required: "Opening hours are required" })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition"
-                            />
-                            {shopErrors.opening_hours && <p className="text-red-500 text-sm mt-1">{shopErrors.opening_hours.message}</p>}
-                        </div>
-                        {/* Website */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
-                            <input
-                                type="url"
-                                placeholder="https://example.com"
-                                {...registerShop("website", {
-                                    pattern: {
-                                        value: /^(https?:\/\/)?([\w\-])+\.[\w\-]+[\w\-._~:/?#[\]@!$&'()*+,;=.]*$/i,
-                                        message: "Invalid URL"
-                                    }
-                                })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition"
-                            />
-                            {shopErrors.website && <p className="text-red-500 text-sm mt-1">{shopErrors.website.message}</p>}
-                        </div>
-                        {/* Category */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
-                            <select
-                                {...registerShop("category", { required: "Category is required" })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition"
-                            >
-                                <option value="">Select a category</option>
-                                {SHOP_CATEGORIES.map(cat => (
-                                    <option key={cat} value={cat}>{cat}</option>
-                                ))}
-                            </select>
-                            {shopErrors.category && <p className="text-red-500 text-sm mt-1">{shopErrors.category.message}</p>}
-                        </div>
-                        {/* Actions */}
-                        <div className="flex gap-3 pt-2">
-                            <button
-                                type="button"
-                                onClick={() => setActiveStep(1)}
-                                className="w-1/3 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-lg font-medium transition"
-                            >
-                                Back
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={createShopMutation.isPending}
-                                className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed text-white py-2 rounded-lg font-medium shadow-sm transition"
-                            >
-                                {createShopMutation.isPending ? "Creating..." : "Create"}
-                            </button>
-                        </div>
-                        {createShopMutation.error && createShopMutation.error instanceof AxiosError && (
-                            <p className="text-red-500 text-sm mt-1">{createShopMutation.error.response?.data?.message || createShopMutation.error.message}</p>
-                        )}
-                    </form>
-                </div>
+                // <CreateShop setActiveStep={setActiveStep} createShopMutation={createShopMutation} onCreateShop={onCreateShop} registerShop={registerShop} handleSubmitShop={handleSubmitShop} shopErrors={shopErrors} bioWordCount={bioWordCount} />
+                <CreateShop sellerId={sellerId} setActiveStep={setActiveStep} />
             )}
             {activeStep === 3 && (
-                <div className="max-w-md w-full p-8 bg-white/80 backdrop-blur border border-gray-100 shadow-xl rounded-2xl">
-                    <h2 className="text-2xl font-semibold text-center text-gray-900 mb-6">Setup new shop</h2>
-                    <form onSubmit={handleSubmitShop(onCreateShop)} className="space-y-5">
-                        {/* Shop Name */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
-                            <input
-                                type="text"
-                                placeholder="shop name"
-                                {...registerShop("shop_name", { required: "Shop name is required", minLength: { value: 2, message: "Too short" } })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition"
-                            />
-                            {shopErrors.shop_name && <p className="text-red-500 text-sm mt-1">{shopErrors.shop_name.message}</p>}
-                        </div>
-                        {/* Bio */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Bio (Max 100 words) *</label>
-                            <textarea
-                                rows={3}
-                                placeholder="shop bio"
-                                {...registerShop("bio", { required: "Bio is required" })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg resize-y bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition"
-                            />
-                            <div className="flex justify-between mt-1 text-xs text-gray-500">
-                                <span>{bioWordCount}/100 words</span>
-                                {shopErrors.bio && <span className="text-red-500">{shopErrors.bio.message}</span>}
-                            </div>
-                        </div>
-                        {/* Address */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
-                            <input
-                                type="text"
-                                placeholder="shop location"
-                                {...registerShop("address", { required: "Address is required" })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition"
-                            />
-                            {shopErrors.address && <p className="text-red-500 text-sm mt-1">{shopErrors.address.message}</p>}
-                        </div>
-                        {/* Opening Hours */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Opening Hours *</label>
-                            <input
-                                type="text"
-                                placeholder="e.g., Mon-Fri 9AM - 6PM"
-                                {...registerShop("opening_hours", { required: "Opening hours are required" })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition"
-                            />
-                            {shopErrors.opening_hours && <p className="text-red-500 text-sm mt-1">{shopErrors.opening_hours.message}</p>}
-                        </div>
-                        {/* Website */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
-                            <input
-                                type="url"
-                                placeholder="https://example.com"
-                                {...registerShop("website", {
-                                    pattern: {
-                                        value: /^(https?:\/\/)?([\w\-])+\.[\w\-]+[\w\-._~:/?#[\]@!$&'()*+,;=.]*$/i,
-                                        message: "Invalid URL"
-                                    }
-                                })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition"
-                            />
-                            {shopErrors.website && <p className="text-red-500 text-sm mt-1">{shopErrors.website.message}</p>}
-                        </div>
-                        {/* Category */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Category *</label>
-                            <select
-                                {...registerShop("category", { required: "Category is required" })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition"
-                            >
-                                <option value="">Select a category</option>
-                                {SHOP_CATEGORIES.map(cat => (
-                                    <option key={cat} value={cat}>{cat}</option>
-                                ))}
-                            </select>
-                            {shopErrors.category && <p className="text-red-500 text-sm mt-1">{shopErrors.category.message}</p>}
-                        </div>
-                        {/* Actions */}
-                        <div className="flex gap-3 pt-2">
-                            <button
-                                type="button"
-                                onClick={() => setActiveStep(1)}
-                                className="w-1/3 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-lg font-medium transition"
-                            >
-                                Back
-                            </button>
-                            <button
-                                type="submit"
-                                disabled={createShopMutation.isPending}
-                                className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed text-white py-2 rounded-lg font-medium shadow-sm transition"
-                            >
-                                {createShopMutation.isPending ? "Creating..." : "Create"}
-                            </button>
-                        </div>
-                        {createShopMutation.error && createShopMutation.error instanceof AxiosError && (
-                            <p className="text-red-500 text-sm mt-1">{createShopMutation.error.response?.data?.message || createShopMutation.error.message}</p>
-                        )}
-                    </form>
+                <div className="max-w-md w-full p-8 bg-white/80 backdrop-blur border border-gray-100 shadow-xl rounded-2xl flex flex-col items-center">
+                    <h2 className="text-2xl font-semibold text-center text-gray-900 mb-4">
+                        Withdrawal Method
+                    </h2>
+                    <p className="text-gray-500 text-center mb-6 text-sm">
+                        Connect your bank account to receive payouts securely.
+                    </p>
+                    <button
+                        type="button"
+                        className="w-full cursor-pointer flex items-center justify-center gap-3 bg-[#635bff] hover:bg-[#5546d6] disabled:opacity-60 disabled:cursor-not-allowed text-white py-2.5 rounded-lg font-medium shadow-sm transition mb-2"
+                        onClick={handleConnectStripe}
+                    >
+                        {/* Stripe SVG Logo */}
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                            <rect width="24" height="24" rx="6" fill="#fff" />
+                            <path fill="#635bff" d="M11.12 9.19c0-.6.49-.83 1.31-.83 1.18 0 2.66.36 3.84 1.01V5.71c-1.28-.51-2.55-.71-3.84-.71-3.14 0-5.22 1.64-5.22 4.37 0 4.27 5.87 3.59 5.87 5.44 0 .71-.62.94-1.48.94-1.28 0-2.92-.53-4.22-1.24v3.68c1.44.62 2.89.89 4.22.89 3.22 0 5.43-1.59 5.43-4.36-.02-4.61-5.91-3.79-5.91-5.5z" />
+                        </svg>
+                        <span className="font-semibold text-base">Connect to Stripe</span>
+                    </button>
                 </div>
             )}
         </div>
