@@ -27,4 +27,7 @@ router.get("/logged-in-seller", isAuthenticated, isSeller, authController.getSel
 // router.post("/forgot-password-seller", authController.handleForgetPassword.bind(null, "seller"))
 // router.post("/reset-password-seller", authController.resetSellerPassword)
 
+// Logout Route (common for both users and sellers)
+
+
 export default router

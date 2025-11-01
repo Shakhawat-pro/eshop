@@ -35,6 +35,7 @@
     "../../apps/user-ui/.next/types/**/*.ts",
     "../../dist/apps/user-ui/.next/types/**/*.ts",
     "next-env.d.ts",
+    "src/**/*.d.ts",
     "src/**/*.js",
     "src/**/*.jsx",
     "src/**/*.ts",

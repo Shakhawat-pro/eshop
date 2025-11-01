@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
-  .font-poppins {
-    font-family: "Poppins", sans-serif;
-  }
+.font-poppins {
+  font-family: "Poppins", sans-serif;
+}
 
-  .font-roboto {
-    font-family: "Roboto", sans-serif;
-  }
+.font-roboto {
+  font-family: "Roboto", sans-serif;
+}
 
 html {
   -webkit-text-size-adjust: 100%;

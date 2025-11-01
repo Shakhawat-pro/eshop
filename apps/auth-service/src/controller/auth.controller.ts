@@ -136,14 +136,16 @@ const LoginUser = async (req: Request, res: Response, next: NextFunction) => {
 const refreshToken = async (req: Request, res: Response, next: NextFunction) => {
     try {
         console.log("Refreshing token.............");
+        const token =
+            req.cookies["refresh_token"] ||
+            req.cookies["seller_refresh_token"] ||
+            req.headers.authorization?.split(" ")[1];
 
-        const refreshToken = req.cookies.refresh_token
-
-        if (!refreshToken) {
+        if (!token) {
             throw new ValidationError("Unauthorized! No Refresh Token.");
         }
 
-        const decode = Jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET as string) as { id: string, role: string };
+        const decode = Jwt.verify(token, process.env.REFRESH_TOKEN_SECRET as string) as { id: string, role: string };
 
         if (!decode || !decode.id || !decode.role) {
             throw new JsonWebTokenError("Forbidden! Invalid Token.")
@@ -153,7 +155,7 @@ const refreshToken = async (req: Request, res: Response, next: NextFunction) => 
         if (decode.role === "user") {
             account = await prisma.users.findUnique({ where: { id: decode.id } })
         } else if (decode.role === "seller") {
-            account = await prisma.sellers.findUnique({ where: { id: decode.id } })
+            account = await prisma.sellers.findUnique({ where: { id: decode.id }, include: { shop: true } })
         }
         if (!account) {
             throw new AuthError("Account does not exist!")
@@ -313,11 +315,11 @@ const verifySeller = async (req: Request, res: Response, next: NextFunction) => 
 // create a new shop
 const createShop = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { name, bio, address,  opening_hours, website, category, sellerId } = req.body;
+        const { name, bio, address, opening_hours, website, category, sellerId } = req.body;
 
-        console.log("Creating shop with data:", { name, bio, address,  opening_hours, website, category, sellerId });
-        
-        
+        console.log("Creating shop with data:", { name, bio, address, opening_hours, website, category, sellerId });
+
+
         if (!name || !bio || !address || !opening_hours || !category || !sellerId) {
             return next(new ValidationError("All fields are required!"));
         }
@@ -354,16 +356,16 @@ const createShop = async (req: Request, res: Response, next: NextFunction) => {
 //  create stripe connect account link
 const createStripeConnectLink = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        
+
         const { sellerId } = req.body;
         if (!sellerId) {
             throw new ValidationError("Seller ID is required");
         }
-        
+
         const seller = await prisma.sellers.findUnique({ where: { id: sellerId } })
-        
+
         if (!seller) throw new ValidationError("Seller is not available with this id");
-        
+
         console.log("Create Stripe Connect Link called");
         const account = await stripe.accounts.create({
             type: 'express',
@@ -433,6 +435,9 @@ const LoginSeller = async (req: Request, res: Response, next: NextFunction) => {
             { expiresIn: "7d" }
         );
 
+        // clear existing cookies
+        res.clearCookie("access_token");
+        res.clearCookie("refresh_token");
         // store the refresh and access token in an httpOnly cookie
         setCookie(res, "seller_refresh_token", refreshToken)
         setCookie(res, "seller_access_token", accessToken)

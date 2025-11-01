@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+.font-poppins {
+  font-family: "Poppins", sans-serif;
+}
 
 html {
   -webkit-text-size-adjust: 100%;
