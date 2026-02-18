@@ -15,6 +15,7 @@ router.get("/logged-in-user", isAuthenticated, authController.getUser)
 router.post("/forgot-password-user", authController.userForgotPassword)
 router.post("/reset-password-user", authController.resetUserPassword)
 router.post("/verify-forgot-password-otp", authController.verifyForgotPassword)
+router.post("/resend-otp/user", authController.resendOtp)
 
 // Seller Routes
 router.post("/seller-registration", authController.registerSeller)
@@ -26,8 +27,13 @@ router.post("/refresh-token-seller", authController.refreshToken)
 router.get("/logged-in-seller", isAuthenticated, isSeller, authController.getSeller)
 // router.post("/forgot-password-seller", authController.handleForgetPassword.bind(null, "seller"))
 // router.post("/reset-password-seller", authController.resetSellerPassword)
+router.post("/resend-otp/:type", authController.resendOtp)
+
+
 
 // Logout Route (common for both users and sellers)
+router.post("/logout", isAuthenticated, authController.logout)
+
 
 
 export default router

@@ -246,6 +246,8 @@ const resetUserPassword = async (req: Request, res: Response, next: NextFunction
 
 }
 
+
+
 // Register a new seller
 const registerSeller = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -474,6 +476,88 @@ const getSeller = async (req: any, res: Response, next: NextFunction) => {
     }
 }
 
+const resendOtp = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { type } = req.params;
+        const { email, name } = req.body;
+        console.log("Resend OTP called with:", { type, email, name });
+        if (!email) {
+            throw new ValidationError("Email is required!");
+        }
+
+        // Allowed types
+        const templateMap: Record<string, string> = {
+            user: "user-activation-email",
+            seller: "seller-activation-email",
+            "forgot-password": "forgot-password-user-email",
+        };
+
+        if (!templateMap[type]) {
+            throw new ValidationError("Invalid resend OTP type");
+        }
+
+        // Apply security restrictions
+        await checkOtpRestrictions(email, next);
+        await trackOtpRequests(email, next);
+
+        // Send OTP
+        await sendOtp(name || "User", email, templateMap[type]);
+
+        res.status(200).json({
+            success: true,
+            message: "OTP resent successfully!",
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+
+// const resendUserOtp = async (req: Request, res: Response, next: NextFunction) => {
+//     try {
+//         const { email, name } = req.body;
+
+//         if (!email || !name) {
+//             throw new ValidationError("Email and name are required!");
+//         }
+
+//         // Check restrictions (cooldown, spam lock, etc)
+//         await checkOtpRestrictions(email, next);
+//         await trackOtpRequests(email, next);
+
+//         // Send OTP
+//         await sendOtp(name, email, "user-activation-email");
+
+//         res.status(200).json({
+//             success: true,
+//             message: "OTP resent successfully!"
+//         });
+
+//     } catch (error) {
+//         return next(error);
+//     }
+// };
+
+
+
+const logout = async (req: any, res: Response, next: NextFunction) => {
+    try {
+        // Clear all relevant cookies
+        res.clearCookie("access_token");
+        res.clearCookie("refresh_token");
+        res.clearCookie("seller_access_token");
+        res.clearCookie("seller_refresh_token");
+        res.status(200).json({
+            success: true,
+            message: "Logged out successfully!"
+        });
+    } catch (error) {
+        return next(error)
+    }
+}
+
+
 // export 
 export const authController = {
     userRegistration,
@@ -489,5 +573,7 @@ export const authController = {
     createShop,
     createStripeConnectLink,
     LoginSeller,
-    getSeller
+    getSeller,
+    resendOtp,
+    logout
 }

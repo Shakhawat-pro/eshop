@@ -85,8 +85,33 @@ const Signup = () => {
             // setSellerData(null);
             // setOtp(["", "", "", ""]);
             // router.push("/login");
+        },
+        onError: (error) => {
+            console.log("eeee", error)
         }
     })
+
+    const resendOtpMutation = useMutation({
+        mutationFn: async () => {
+            if (!sellerData) return;
+
+            const response = await axios.post(
+                `${process.env.NEXT_PUBLIC_API_URL}/resend-otp/seller`,
+                {
+                    email: sellerData.email,
+                    name: sellerData.name
+                }
+            );
+
+            return response.data;
+        },
+        onSuccess: () => {
+            setCanResend(false);
+            setTimer(60);
+            startResendTimer();
+        }
+    });
+
 
     const onSubmit = async (data: FormData) => {
         try {
@@ -126,7 +151,7 @@ const Signup = () => {
         inputRefs.current[lastFilledIndex]?.focus();
     }
     const handleResendOtp = () => {
-
+        resendOtpMutation.mutate();
     }
 
     // console.log("errors", verifyMutation?.error);
@@ -395,10 +420,12 @@ const Signup = () => {
                                         <button
                                             type="button"
                                             onClick={handleResendOtp}
-                                            className="text-orange-500 hover:underline"
+                                            disabled={resendOtpMutation.isPending}
+                                            className="text-orange-500 hover:underline disabled:opacity-50"
                                         >
-                                            Resend OTP
+                                            {resendOtpMutation.isPending ? "Sending..." : "Resend OTP"}
                                         </button>
+
                                     ) : (
                                         <p className="text-gray-500 text-sm">
                                             Resend OTP in {timer} seconds
@@ -409,6 +436,15 @@ const Signup = () => {
                                             <p className="text-red-500 text-sm mt-1">{verifyMutation.error.response?.data?.message || verifyMutation.error.message}</p>
                                         )
                                     }
+                                    {
+                                        resendOtpMutation.error instanceof AxiosError && (
+                                            <p className="text-red-500 text-sm mt-1">
+                                                {resendOtpMutation.error.response?.data?.message ||
+                                                    resendOtpMutation.error.message}
+                                            </p>
+                                        )
+                                    }
+
                                 </div>
                             </div>
                         )}

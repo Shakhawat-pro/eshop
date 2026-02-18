@@ -67,6 +67,8 @@ export const sendOtp = async (name: string, email: string, template: string) => 
 
 export const verifyOtp = async (email: string, otp: string, next: NextFunction) => {
     const storedOtp = await redis.get(`otp: ${email}`)
+    console.log("tesert",storedOtp);
+    
     console.log({
         "storedOtp": Number(storedOtp),
         "providedOtp": Number(otp),
@@ -75,7 +77,7 @@ export const verifyOtp = async (email: string, otp: string, next: NextFunction) 
     if (!storedOtp) {
         throw new ValidationError("OTP expired or not found! Please request a new one.")
     }
-    const failedAttemptsKey = `otp_attempts${email}`
+    const failedAttemptsKey = `otp_attempts:${email}`
     const failedAttempts = parseInt((await redis.get(failedAttemptsKey) || "0"))
 
 
@@ -90,8 +92,7 @@ export const verifyOtp = async (email: string, otp: string, next: NextFunction) 
         throw new ValidationError(`Invalid OTP! Please try again. ${2 - failedAttempts} attempts left before account lock.`)
     }
 
-    await redis.del(`otp: ${email}`, failedAttemptsKey);
-
+    // await redis.del(`otp: ${email}`, failedAttemptsKey);
 
 }
 
