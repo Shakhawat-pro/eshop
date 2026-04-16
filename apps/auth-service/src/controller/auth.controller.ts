@@ -429,7 +429,7 @@ const LoginSeller = async (req: Request, res: Response, next: NextFunction) => {
         const accessToken = Jwt.sign(
             { id: seller.id, role: "seller" },
             process.env.ACCESS_TOKEN_SECRET! as string,
-            { expiresIn: "15m" }
+            { expiresIn: "5h" }
         );
         const refreshToken = Jwt.sign(
             { id: seller.id, role: "seller" },

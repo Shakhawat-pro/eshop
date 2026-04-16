@@ -1,4 +1,4 @@
-import SidebarWrapper from '@/components/sidebar/sidebar';
+import SidebarWrapper from '@/components/sidebar/Sidebar';
 import React from 'react';
 
 const layout = ({ children }: { children: React.ReactNode }) => {

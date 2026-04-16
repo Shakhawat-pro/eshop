@@ -1,7 +1,7 @@
 import React from "react";
 
-const PaymentsPage = () => {
+const Page = () => {
     return <div className="text-white text-2xl">Payments Page</div>;
 };
 
-export default PaymentsPage;
+export default Page;

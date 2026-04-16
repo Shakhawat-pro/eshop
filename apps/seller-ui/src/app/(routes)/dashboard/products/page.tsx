@@ -1,7 +1,7 @@
 import React from "react";
 
-const ProductsPage = () => {
+const Page = () => {
     return <div className="text-white text-2xl">All Products Page</div>;
 };
 
-export default ProductsPage;
+export default Page;
