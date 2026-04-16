@@ -1,5 +1,6 @@
 "use client";
 import BreadCrumbAndHeader from '@/components/Shared/BreadCrumbAndHeader';
+import ImagePlaceHolder from '@/components/Shared/ImagePlaceHolder/ImagePlaceHolder';
 
 import { useForm } from 'react-hook-form';
 
@@ -20,8 +21,15 @@ const CreateProduct = () => {
                 { name: "Products", href: "/dashboard/products" },
                 { name: "Create Product" }
             ]} />
-            <form>
 
+            <form>
+                {/* Content Layout */}
+                <div className='py-4 w-full flex gap-6'>
+                    {/* Left Side - Image upload Section */}                  
+                    <div className='w-full max-w-[35%] bg-[#1e1e1e] rounded-md p-4'>
+                         <ImagePlaceHolder size={200} onImageChange={() => { }} setOpenImageModal={() => { }} />
+                    </div>
+                </div>
             </form>
         </div>
     );
