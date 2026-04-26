@@ -20,6 +20,7 @@ import {
     Ticket,
     LogOut,
 } from "lucide-react";
+import axiosInstance from "@/utils/axiosInstance";
 
 // ✅ Separate component (better performance & readability)
 const SidebarItem = ({
@@ -64,6 +65,20 @@ const SidebarWrapper = () => {
         (route: string) => activeSidebar === route,
         [activeSidebar]
     );
+
+    const handleLogout = () => {
+        // Implement logout logic here (e.g., clear tokens, redirect to login page)
+        console.log("Logout clicked");
+        axiosInstance.post("/logout")
+            .then(() => {
+                // Clear any client-side authentication data (e.g., cookies, localStorage)
+                // Redirect to login page or homepage
+                window.location.href = "/login"; // Adjust the path as needed
+            })
+            .catch((error) => {
+                console.error("Logout failed:", error);
+            });      
+    }
 
     return (
         <div>
@@ -171,7 +186,7 @@ const SidebarWrapper = () => {
                     isActive={isActive("/logout")}
                 /> */}
                 <div
-
+                    onClick={handleLogout}
                     className={`flex items-center gap-3 px-3 py-2 rounded-md text-[15px] font-medium transition-colors text-gray-400 hover:text-gray-100 hover:bg-blue-500/30 cursor-pointer`}>
                     <LogOut size={20} />
                     Logout

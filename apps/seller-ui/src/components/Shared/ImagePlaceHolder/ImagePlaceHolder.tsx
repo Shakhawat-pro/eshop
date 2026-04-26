@@ -39,12 +39,12 @@ const ImagePlaceHolder = ({ size, small, onImageChange, onRemove, defaultImage, 
                             setImagePreview(null);
                             onRemove ? onRemove(index) : onImageChange(null, index);
                         }}
-                        className='absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 z-10'
+                        className='absolute top-3 right-3 rounded bg-red-500 text-white shadow-lg cursor-pointer p-2 z-10'
                     >
                         <X size={16} />
                     </button>
                     <button type='button' onClick={() => setOpenImageModal(true)}
-                        className='absolute top-3 right-[70px] rounded bg-blue-500 shadow-lg cursor-pointer'>
+                        className='absolute top-3 right-16 rounded bg-blue-500 shadow-lg cursor-pointer p-2 z-10'>
                         <WandSparkles size={16} color='white' />
                     </button>
                 </>
@@ -55,7 +55,13 @@ const ImagePlaceHolder = ({ size, small, onImageChange, onRemove, defaultImage, 
             )}
 
             {imagePreview ? (
-                <Image src={imagePreview} alt={`Image Preview ${index}`} width={200} height={200} className='object-cover h-full w-full rounded-md' />
+                <Image
+                    src={imagePreview}
+                    alt={`Image Preview ${index}`}
+                    width={400}
+                    height={300}
+                    className='object-cover h-full w-full rounded-md'
+                />
             ) : (
                 <>
                     <p className={`text-gray-400 ${small ? "text-xl" : "text-4xl"} font-semibold`}>

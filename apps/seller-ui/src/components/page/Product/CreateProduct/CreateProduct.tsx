@@ -4,6 +4,7 @@ import ImagePlaceHolder from '@/components/Shared/ImagePlaceHolder/ImagePlaceHol
 import { useState } from 'react';
 
 import { useForm } from 'react-hook-form';
+import Input from '../../../../../../../packages/components/Input/Index';
 
 const CreateProduct = () => {
     const [openImageModal, setOpenImageModal] = useState(false);
@@ -42,9 +43,9 @@ const CreateProduct = () => {
             if (!updatedImages.includes(null) && updatedImages.length < 8) {
                 updatedImages.push(null);
             }
+            setValue('images', updatedImages);
             return updatedImages;
         });
-        setValue('images', images);
     }
 
 
@@ -61,14 +62,44 @@ const CreateProduct = () => {
                 {/* Content Layout */}
                 <div className='py-4 w-full flex gap-6'>
                     {/* Left Side - Image upload Section */}
-                    <div className='w-full max-w-[35%] bg-[#1e1e1e] rounded-md p-4'>
-                        <ImagePlaceHolder
-                            size="765 x 850"
-                            small={false}
-                            setOpenImageModal={setOpenImageModal}
-                            onImageChange={handleImageChange}
-                            onRemove={handleRemoveImage}
-                        />
+                    <div className='md:w-[35%] flex items-center'>
+                        {images?.length > 0 &&
+                            <ImagePlaceHolder
+                                size="765 x 850"
+                                small={false}
+                                index={0}
+                                setOpenImageModal={setOpenImageModal}
+                                onImageChange={handleImageChange}
+                                onRemove={handleRemoveImage}
+                            />
+                        }
+                        <div className='grid grid-cols-2 gap-3 mt-4 '>
+                            {images.slice(1).map((_, index) => (
+                                <ImagePlaceHolder
+                                    key={index + 1}
+                                    size="765 x 850"
+                                    small={true}
+                                    index={index + 1}
+                                    setOpenImageModal={setOpenImageModal}
+                                    onImageChange={handleImageChange}
+                                    onRemove={handleRemoveImage}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                    {/* Right Side - Form Input */}
+                    <div className='md:w-[65%] '>
+                        <div className='w-full flex gap-6'>
+                            {/* Product Title Input */}
+                            <div className='w-2/4'>
+                                <Input
+                                    label="Product Title"
+                                    placeholder='Enter Product Title'
+                                    {...register('title', { required: 'Product title is required' })}
+                                />
+
+                            </div>
+                        </div>
                     </div>
                 </div>
             </form>
