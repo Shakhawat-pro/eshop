@@ -6,6 +6,8 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Input from '../../../../../../../packages/components/Input/Index';
 import ColorSelector from '../../../../../../../packages/components/color-selector';
+import CustomSpecifications from '../../../../../../../packages/components/custom-specifications';
+import CustomProperties from '../../../../../../../packages/components/custom-properties';
 
 const CreateProduct = () => {
     const [openImageModal, setOpenImageModal] = useState(false);
@@ -190,6 +192,10 @@ const CreateProduct = () => {
                                 </div>
                                 {/* Color Selector */}
                                 <ColorSelector control={control} errors={errors} />
+                                {/* Custom Specifications */}
+                                <CustomSpecifications control={control} errors={errors} />
+                                {/* Custom Properties */}
+                                <CustomProperties control={control} errors={errors} />
                             </div>
 
                         </div>
