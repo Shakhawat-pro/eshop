@@ -25,7 +25,7 @@ const ImagePlaceHolder = ({ size, small, onImageChange, onRemove, defaultImage, 
     };
 
     return (
-        <div className={`relative ${small ? "h-[180px]" : "h-[450px]"} w-full cursor-pointer bg-[#1e1e1e] border border-gray-600 rounded-lg flex flex-col items-center justify-center`}>
+        <div className={`relative ${small ? "h-[180px]" : "h-[450px]"} w-full cursor-pointer  bg-[#1e1e1e] border border-gray-600 rounded-lg flex flex-col items-center justify-center`}>
             <input type='file'
                 accept='image/*'
                 className='hidden'

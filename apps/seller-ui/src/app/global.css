@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@source "../**/*.{ts,tsx,js,jsx,html}";
+@source "../../../../packages/components/**/*.{ts,tsx,js,jsx}";
 
 .font-poppins {
   font-family: "Poppins", sans-serif;
