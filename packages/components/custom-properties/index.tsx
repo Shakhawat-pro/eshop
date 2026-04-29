@@ -8,6 +8,8 @@ const CustomProperties = ({ control, errors }: any) => {
     const [newLabel, setNewLabel] = useState('');
     const [newValues, setNewValues] = useState<Record<number, string>>({});
 
+    console.log(newValues[1])
+
     return (
         <div className="">
             <div className="flex flex-col gap-6">
@@ -32,8 +34,16 @@ const CustomProperties = ({ control, errors }: any) => {
                         const addValue = (index: number) => {
                             const nextValue = (newValues[index] || '').trim();
                             if (!nextValue) return;
-                            const updatedProperties = [...properties];
-                            updatedProperties[index].value.push(nextValue);
+                            // const updatedProperties = [...properties];
+                            // updatedProperties[index].value.push(nextValue);
+                            // setProperties(updatedProperties);
+                            // setNewValues((prev) => ({ ...prev, [index]: '' }));
+                            const updatedProperties = properties.map((prop, i) => {
+                                if (i === index) {
+                                    if (prop.value.includes(nextValue)) return prop;
+                                    return { ...prop, value: [...prop.value, nextValue] };
+                                } return prop;
+                            });
                             setProperties(updatedProperties);
                             setNewValues((prev) => ({ ...prev, [index]: '' }));
                         };
@@ -41,6 +51,16 @@ const CustomProperties = ({ control, errors }: any) => {
                         // Remove a property group by index.
                         const removeProperty = (index: number) => {
                             setProperties(properties.filter((_, i) => i !== index));
+                        };
+
+                        // Remove a value from a specific property.
+                        const removeValue = (propIndex: number, valIndex: number) => {
+                            const updatedProperties = properties.map((prop, i) => {
+                                if (i === propIndex) {
+                                    return { ...prop, value: prop.value.filter((_, j) => j !== valIndex) };
+                                } return prop;
+                            });
+                            setProperties(updatedProperties);
                         };
 
                         return (
@@ -66,7 +86,7 @@ const CustomProperties = ({ control, errors }: any) => {
                                             No custom properties yet. Add one below.
                                         </div>
                                     )}
-
+                                    {/* Property groups. */}
                                     {properties.map((property, index) => (
                                         <div
                                             key={index}
@@ -120,10 +140,14 @@ const CustomProperties = ({ control, errors }: any) => {
                                             <div className="flex flex-wrap gap-2">
                                                 {property.value.map((val, valIndex) => (
                                                     <div
+                                                        onClick={() => removeValue(index, valIndex)}
                                                         key={valIndex}
-                                                        className="bg-[var(--color-surface-muted)] text-[var(--color-text)] px-2 py-1 rounded-md text-sm"
+                                                        className={`flex items-center gap-1 px-2 py-1 rounded text-sm bg-[var(--color-surface-muted)] text-[var(--color-text)] cursor-pointer hover:bg-[var(--color-surface-strong)] transition-colors group relative`}
                                                     >
                                                         {val}
+                                                        <div className='absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded bg-[rgba(0,0,0,0.6)]'>
+                                                            <X size={12} className="text-red-500" />
+                                                        </div>
                                                     </div>
                                                 ))}
                                             </div>
