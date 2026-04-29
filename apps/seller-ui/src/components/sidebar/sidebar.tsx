@@ -38,8 +38,8 @@ const SidebarItem = ({
         <Link
             href={route}
             className={`flex items-center gap-3 px-3 py-2 rounded-md text-[15px] font-medium transition-colors ${isActive
-                ? "text-white bg-[#00358b]"
-                : "text-gray-400 hover:text-gray-100 hover:bg-blue-500/30"
+                ? "text-[var(--color-text)] bg-[var(--color-surface-strong)] border border-[var(--color-border)]"
+                : "text-[var(--color-text-muted)] border border-transparent hover:text-[var(--color-text)] hover:bg-[var(--color-surface-strong)]"
                 }`}
         >
             <Icon size={20} />
@@ -85,12 +85,12 @@ const SidebarWrapper = () => {
             {/* Sidebar Header */}
             <div className="flex items-center gap-3 px-4 py-3 mb-4">
                 <Link href="/dashboard" className="flex items-center gap-2">
-                    <div className="bg-slate-800 text-slate-400 p-2 rounded-md">
+                    <div className="bg-[var(--color-surface-strong)] text-[var(--color-text-muted)] p-2 rounded-md border border-[var(--color-border)]">
                         <LayoutDashboard size={20} />
                     </div>
                     <div>
                         <h2 className="font-bold text-lg">{seller?.shop?.name || "Seller Dashboard"}</h2>
-                        <p className="text-xs text-slate-500 line-clamp-1">{seller?.shop?.address || "Manage your shop"}</p>
+                        <p className="text-xs text-[var(--color-text-muted)] line-clamp-1">{seller?.shop?.address || "Manage your shop"}</p>
                     </div>
                 </Link>
             </div>
@@ -187,7 +187,7 @@ const SidebarWrapper = () => {
                 /> */}
                 <div
                     onClick={handleLogout}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-md text-[15px] font-medium transition-colors text-gray-400 hover:text-gray-100 hover:bg-blue-500/30 cursor-pointer`}>
+                    className={`flex items-center gap-3 px-3 py-2 rounded-md text-[15px] font-medium transition-colors text-[var(--color-text-muted)] hover:text-[var(--color-text)] hover:bg-[var(--color-surface-strong)] cursor-pointer`}>
                     <LogOut size={20} />
                     Logout
                 </div>

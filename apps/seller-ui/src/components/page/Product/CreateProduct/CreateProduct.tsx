@@ -5,6 +5,7 @@ import { useState } from 'react';
 
 import { useForm } from 'react-hook-form';
 import Input from '../../../../../../../packages/components/Input/Index';
+import ColorSelector from '../../../../../../../packages/components/color-selector';
 
 const CreateProduct = () => {
     const [openImageModal, setOpenImageModal] = useState(false);
@@ -187,6 +188,8 @@ const CreateProduct = () => {
                                         <p className='text-red-500 text-sm mt-1'>{errors.brand.message as string}</p>
                                     )}
                                 </div>
+                                {/* Color Selector */}
+                                <ColorSelector control={control} errors={errors} />
                             </div>
 
                         </div>

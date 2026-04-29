@@ -3,10 +3,10 @@ import React from 'react';
 
 const layout = ({ children }: { children: React.ReactNode }) => {
     return (
-        <div className='flex h-full bg-black min-h-screen'>
+        <div className='flex min-h-screen h-full bg-[var(--color-bg)] text-[var(--color-text)]'>
             {/* Sidebar */}
-            <aside className='w-[280px] min-w-[250px] max-w-[300px]  text-white p-4 border-r border-r-slate-800'>
-                <div className='sticky top-0 '>
+            <aside className='sticky top-0 h-screen w-[240px] min-w-[220px] max-w-[260px] shrink-0 p-3 bg-[var(--color-surface)] border-r border-r-[var(--color-border)]'>
+                <div className='h-full overflow-y-auto no-scrollbar'>
                     <SidebarWrapper />
                 </div>
             </aside>

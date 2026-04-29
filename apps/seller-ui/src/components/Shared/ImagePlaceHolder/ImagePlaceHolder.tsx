@@ -25,7 +25,9 @@ const ImagePlaceHolder = ({ size, small, onImageChange, onRemove, defaultImage, 
     };
 
     return (
-        <div className={`relative ${small ? "h-[180px]" : "h-[450px]"} w-full cursor-pointer  bg-[#1e1e1e] border border-gray-600 rounded-lg flex flex-col items-center justify-center`}>
+        <div
+            className={`relative ${small ? "h-[180px]" : "h-[450px]"} w-full cursor-pointer bg-[var(--color-surface-muted)] border border-[var(--color-border)] rounded-lg flex flex-col items-center justify-center shadow-[inset_0_1px_0_rgba(255,255,255,0.03)]`}
+        >
             <input type='file'
                 accept='image/*'
                 className='hidden'
@@ -39,17 +41,17 @@ const ImagePlaceHolder = ({ size, small, onImageChange, onRemove, defaultImage, 
                             setImagePreview(null);
                             onRemove ? onRemove(index) : onImageChange(null, index);
                         }}
-                        className='absolute top-3 right-3 rounded bg-red-500 text-white shadow-lg cursor-pointer p-2 z-10'
+                        className='absolute top-3 right-3 rounded bg-[#ef4444] text-white shadow-lg cursor-pointer p-2 z-10'
                     >
                         <X size={16} />
                     </button>
                     <button type='button' onClick={() => setOpenImageModal(true)}
-                        className='absolute top-3 right-16 rounded bg-blue-500 shadow-lg cursor-pointer p-2 z-10'>
+                        className='absolute top-3 right-16 rounded bg-[var(--color-accent)] shadow-lg cursor-pointer p-2 z-10'>
                         <WandSparkles size={16} color='white' />
                     </button>
                 </>
             ) : (
-                <label htmlFor={`image-upload-${index}`} className='absolute top-3 right-3 p-2 rounded bg-slate-700 shadow-lg cursor-pointer'>
+                <label htmlFor={`image-upload-${index}`} className='absolute top-3 right-3 p-2 rounded bg-[var(--color-surface-strong)] border border-[var(--color-border)] shadow-lg cursor-pointer'>
                     <Pencil size={16} color='white' />
                 </label>
             )}
@@ -64,10 +66,10 @@ const ImagePlaceHolder = ({ size, small, onImageChange, onRemove, defaultImage, 
                 />
             ) : (
                 <>
-                    <p className={`text-gray-400 ${small ? "text-xl" : "text-4xl"} font-semibold`}>
+                    <p className={`text-[var(--color-text)] ${small ? "text-xl" : "text-4xl"} font-semibold`}>
                         {size}
                     </p>
-                    <p className={`text-gray-400 ${small ? "text-sm" : "text-base"} pt-2 text-center`}>
+                    <p className={`text-[var(--color-text-muted)] ${small ? "text-sm" : "text-base"} pt-2 text-center`}>
                         Please choose an Image <br />
                         according to the expected ratio.
                     </p>
