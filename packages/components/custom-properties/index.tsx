@@ -67,7 +67,7 @@ const CustomProperties = ({ control, errors }: any) => {
                             <div className="mt-2">
                                 <div className="flex items-end justify-between">
                                     <div>
-                                        <label className="block mb-1 text-sm font-semibold tracking-wide text-[var(--color-text)]">
+                                        <label className="block mb-1 text-sm font-semibold  tracking-wide text-[var(--color-text)]">
                                             Custom Properties
                                         </label>
                                         <p className="text-xs text-[var(--color-text-muted)]">

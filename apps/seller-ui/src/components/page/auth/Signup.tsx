@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useRef, useState, useEffect } from "react";
-import { set, useForm } from "react-hook-form";
+import { useRef, useState } from "react";
+import { useForm } from "react-hook-form";
 import { Eye, EyeOff } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";

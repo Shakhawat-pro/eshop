@@ -78,6 +78,7 @@
     "@types/nodemailer": "^6.4.17",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@juristr/nx-tailwind-sync": "^0.0.9",
     "autoprefixer": "10.4.13",
     "esbuild": "^0.19.2",
     "jest": "^30.0.2",
