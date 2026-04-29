@@ -61,11 +61,11 @@ body {
   font-family: inherit;
   line-height: inherit;
   margin: 0;
-  background-color: var(--color-bg);
-  color: var(--color-text);
+  /* background-color: var(--color-bg); */
+  /* color: var(--color-text); */
 }
 
-::selection {
+/* ::selection {
   background: var(--color-selection-bg);
   color: var(--color-selection-text);
-}
+} */

@@ -196,6 +196,23 @@ const CreateProduct = () => {
                                 <CustomSpecifications control={control} errors={errors} />
                                 {/* Custom Properties */}
                                 <CustomProperties control={control} errors={errors} />
+
+                                {/* Cash on Delivery */}
+                                <div>
+                                    <label className='block text-sm font-medium text-[var(--color-text)] mb-1'>Product Description *</label>
+                                    <select
+                                        {...register('cod', { required: 'Please select an option' })}
+                                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] ${errors.cod ? 'border-red-500' : 'border-[var(--color-border)]'}`}
+                                    >
+                                        <option value="">Select an option</option>
+                                        <option value="available">Available</option>
+                                        <option value="not_available">Not Available</option>
+                                    </select>
+                                    {errors.cod && (
+                                        <p className='text-red-500 text-sm mt-1'>{errors.cod.message as string}</p>
+                                    )}
+                                    
+                                </div>
                             </div>
 
                         </div>
