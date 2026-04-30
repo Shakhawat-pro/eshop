@@ -69,7 +69,7 @@ const SidebarWrapper = () => {
     const handleLogout = () => {
         // Implement logout logic here (e.g., clear tokens, redirect to login page)
         console.log("Logout clicked");
-        axiosInstance.post("/logout")
+        axiosInstance.post("/api/logout")
             .then(() => {
                 // Clear any client-side authentication data (e.g., cookies, localStorage)
                 // Redirect to login page or homepage

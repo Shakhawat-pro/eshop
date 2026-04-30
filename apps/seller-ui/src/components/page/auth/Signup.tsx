@@ -57,7 +57,7 @@ const Signup = () => {
 
     const signupMutation = useMutation({
         mutationFn: async (data: FormData) => {
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/seller-registration`, data);
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/seller-registration`, data);
             return response.data;
         },
         onSuccess: (_, formData) => {
@@ -73,7 +73,7 @@ const Signup = () => {
         mutationFn: async () => {
             if (!sellerData) return;
 
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/verify-seller`, { ...sellerData, otp: otp.join("") });
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/verify-seller`, { ...sellerData, otp: otp.join("") });
             console.log(response.data);
 
             return response.data;
@@ -96,7 +96,7 @@ const Signup = () => {
             if (!sellerData) return;
 
             const response = await axios.post(
-                `${process.env.NEXT_PUBLIC_API_URL}/resend-otp/seller`,
+                `${process.env.NEXT_PUBLIC_API_URL}/api/resend-otp/seller`,
                 {
                     email: sellerData.email,
                     name: sellerData.name
@@ -158,7 +158,7 @@ const Signup = () => {
 
     const handleConnectStripe = async () => {
         try {
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/connect-stripe`, { sellerId });
+            const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/connect-stripe`, { sellerId });
             console.log("Stripe connection response:", response.data);
 
             if (response.data.url) {

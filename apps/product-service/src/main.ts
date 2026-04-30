@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import errorMiddleware from '../../../packages/error-handler/error-handler';
+import router from './routes/product.routes';
 
 
 
@@ -22,7 +23,7 @@ app.get('/', (req, res) => {
 
 
 //routes 
-// app.use("/api", router)
+app.use("/api", router)
 
 
 app.use(errorMiddleware)

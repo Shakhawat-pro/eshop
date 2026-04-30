@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 const fetchSeller = async () => {
     try {
-        const response = await axiosInstance.get("/logged-in-user");
+        const response = await axiosInstance.get("/api/logged-in-user");
         return response.data.user;
     } catch (error: any) {
         if (error.response) {
