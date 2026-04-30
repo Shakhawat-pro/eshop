@@ -18,7 +18,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="night">
       <body className={` font-sans antialiased  font-poppins ${poppins.variable}`}>
         <Providers>
           {children}

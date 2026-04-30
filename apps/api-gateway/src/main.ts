@@ -33,15 +33,26 @@ const limiter = rateLimit({
 app.use(limiter)
 
 import { Request, Response } from 'express';
+import initializeSiteConfig from './libs/initializeSiteConfig';
 
 app.get('/gateway-health', (req: Request, res: Response) => {
   res.send({ message: 'Welcome to api-gateway!' });
 });
 
+app.use("/product", proxy("http://localhost:6002"))
 app.use("/", proxy("http://localhost:6001"))
 
+
+
 const port = process.env.PORT || 8080;
+
 const server = app.listen(port, () => {
-  console.log(`Listening at http://localhost:${port}`);
+  console.log(`API Gateway is running on port http://localhost:${port}`);
+  try {
+    initializeSiteConfig();
+  } catch (error) {
+    console.error("Error initializing site config:", error);
+  }
 });
+
 server.on('error', console.error);

@@ -3,6 +3,16 @@
 @source "../../../../packages";
 @source "../../../../libs";
 
+
+@plugin "daisyui" {
+  themes: light --default, dark --prefersdark, black, night;
+}
+
+@plugin "daisyui/theme" {}
+
+
+
+
 :root {
   /* Core background (deeper, cleaner black) */
   --color-bg: #070A0F;
@@ -45,6 +55,12 @@
   --color-ring: var(--color-ring);
 }
 
+@layer utilities {
+  .gradient-bg {
+    @apply bg-gradient-to-r from-[#1E2A3A] to-[#0D1117];
+  }
+}
+
 .font-poppins {
   font-family: "Poppins", sans-serif;
 }
@@ -70,3 +86,4 @@ body {
   background: var(--color-selection-bg);
   color: var(--color-selection-text);
 } */
+

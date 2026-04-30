@@ -91,130 +91,148 @@ const CreateProduct = () => {
                         </div>
                     </div>
                     {/* Right Side - Form Input */}
-                    <div className='md:w-[65%] '>
-                        <div className='w-full flex gap-6'>
+                    <div className='md:w-[65%] w-full flex gap-6'>
+                        {/* Form Left Inputs */}
+                        <div className='w-2/4 space-y-4'>
                             {/* Product Title Input */}
-                            <div className='w-2/4 space-y-4'>
-                                <div className=''>
-                                    <Input
-                                        label="Product Title *"
-                                        placeholder='Enter Product Title'
-                                        {...register('title', { required: 'Product title is required' })}
-                                    />
-                                    {errors.title && (
-                                        <p className='text-red-500 text-sm mt-1'>{errors.title.message as string}</p>
-                                    )}
-                                </div>
-                                {/* Short Description */}
-                                <div className=''>
-                                    <Input
-                                        type='textarea'
-                                        rows={7}
-                                        cols={10}
-                                        label="Short Description *(Max 150 words)"
-                                        placeholder='Enter Product description for quick overview'
-                                        {...register('description', {
-                                            required: 'Description is required',
-                                            validate: (value) => {
-                                                const wordCount = value.trim().split(/\s+/).length;
-                                                return wordCount <= 150 || `Description cannot exceed 150 words (Current: ${wordCount})`;
-                                            }
-                                        })}
-                                    />
-                                    {errors.description && (
-                                        <p className='text-red-500 text-sm mt-1'>{errors.description.message as string}</p>
-                                    )}
-                                </div>
-                                {/* Tag */}
-                                <div className=''>
-                                    <Input
-                                        label="Tags *"
-                                        placeholder='apple,mobile,watch'
-                                        {...register('tags', { required: 'Separate related product tags with coma' })}
-                                    />
-                                    {errors.tags && (
-                                        <p className='text-red-500 text-sm mt-1'>{errors.tags.message as string}</p>
-                                    )}
-                                </div>
-                                {/* Warranty */}
-                                <div className=''>
-                                    <Input
-                                        label="Warranty *"
-                                        placeholder='Enter warranty details'
-                                        {...register('warranty', { required: 'Warranty details are required' })}
-                                    />
-                                    {errors.warranty && (
-                                        <p className='text-red-500 text-sm mt-1'>{errors.warranty.message as string}</p>
-                                    )}
-                                </div>
-                                {/* Slug */}
-                                <div>
-                                    <Input
-                                        label="Slug *"
-                                        placeholder='Enter product slug'
-                                        {...register('slug', {
-                                            required: 'Slug is required',
-                                            pattern: {
-                                                value: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
-                                                message: 'Invalid slug format. Use lowercase letters, numbers, and hyphens only.'
-                                            },
-                                            minLength: {
-                                                value: 3,
-                                                message: 'Slug must be at least 3 characters long.'
-                                            },
-                                            maxLength: {
-                                                value: 50,
-                                                message: 'Slug cannot exceed 50 characters.'
-                                            },
-                                            validate: (value) => {
-                                                const reservedSlugs = ['admin', 'dashboard', 'products', 'create-product'];
-                                                if (reservedSlugs.includes(value)) {
-                                                    return 'This slug is reserved. Please choose a different one.';
-                                                }
-                                                return true;
-                                            }
-                                        })}
-                                    />
-                                    {errors.slug && (
-                                        <p className='text-red-500 text-sm mt-1'>{errors.slug.message as string}</p>
-                                    )}
-                                </div>
-                                {/* Brand */}
-                                <div>
-                                    <Input
-                                        label="Brand "
-                                        placeholder='Enter product brand'
-                                        {...register('brand')}
-                                    />
-                                    {errors.brand && (
-                                        <p className='text-red-500 text-sm mt-1'>{errors.brand.message as string}</p>
-                                    )}
-                                </div>
-                                {/* Color Selector */}
-                                <ColorSelector control={control} errors={errors} />
-                                {/* Custom Specifications */}
-                                <CustomSpecifications control={control} errors={errors} />
-                                {/* Custom Properties */}
-                                <CustomProperties control={control} errors={errors} />
-
-                                {/* Cash on Delivery */}
-                                <div>
-                                    <label className='block text-sm font-medium text-[var(--color-text)] mb-1'>Product Description *</label>
-                                    <select
-                                        {...register('cod', { required: 'Please select an option' })}
-                                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)] ${errors.cod ? 'border-red-500' : 'border-[var(--color-border)]'}`}
-                                    >
-                                        <option value="">Select an option</option>
-                                        <option value="available">Available</option>
-                                        <option value="not_available">Not Available</option>
-                                    </select>
-                                    {errors.cod && (
-                                        <p className='text-red-500 text-sm mt-1'>{errors.cod.message as string}</p>
-                                    )}
-                                    
-                                </div>
+                            <div className=''>
+                                <Input
+                                    label="Product Title *"
+                                    placeholder='Enter Product Title'
+                                    {...register('title', { required: 'Product title is required' })}
+                                />
+                                {errors.title && (
+                                    <p className='text-red-500 text-sm mt-1'>{errors.title.message as string}</p>
+                                )}
                             </div>
+                            {/* Short Description */}
+                            <div className=''>
+                                <Input
+                                    type='textarea'
+                                    rows={7}
+                                    cols={10}
+                                    label="Short Description *(Max 150 words)"
+                                    placeholder='Enter Product description for quick overview'
+                                    {...register('description', {
+                                        required: 'Description is required',
+                                        validate: (value) => {
+                                            const wordCount = value.trim().split(/\s+/).length;
+                                            return wordCount <= 150 || `Description cannot exceed 150 words (Current: ${wordCount})`;
+                                        }
+                                    })}
+                                />
+                                {errors.description && (
+                                    <p className='text-red-500 text-sm mt-1'>{errors.description.message as string}</p>
+                                )}
+                            </div>
+                            {/* Tag */}
+                            <div className=''>
+                                <Input
+                                    label="Tags *"
+                                    placeholder='apple,mobile,watch'
+                                    {...register('tags', { required: 'Separate related product tags with coma' })}
+                                />
+                                {errors.tags && (
+                                    <p className='text-red-500 text-sm mt-1'>{errors.tags.message as string}</p>
+                                )}
+                            </div>
+                            {/* Warranty */}
+                            <div className=''>
+                                <Input
+                                    label="Warranty *"
+                                    placeholder='Enter warranty details'
+                                    {...register('warranty', { required: 'Warranty details are required' })}
+                                />
+                                {errors.warranty && (
+                                    <p className='text-red-500 text-sm mt-1'>{errors.warranty.message as string}</p>
+                                )}
+                            </div>
+                            {/* Slug */}
+                            <div>
+                                <Input
+                                    label="Slug *"
+                                    placeholder='Enter product slug'
+                                    {...register('slug', {
+                                        required: 'Slug is required',
+                                        pattern: {
+                                            value: /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+                                            message: 'Invalid slug format. Use lowercase letters, numbers, and hyphens only.'
+                                        },
+                                        minLength: {
+                                            value: 3,
+                                            message: 'Slug must be at least 3 characters long.'
+                                        },
+                                        maxLength: {
+                                            value: 50,
+                                            message: 'Slug cannot exceed 50 characters.'
+                                        },
+                                        validate: (value) => {
+                                            const reservedSlugs = ['admin', 'dashboard', 'products', 'create-product'];
+                                            if (reservedSlugs.includes(value)) {
+                                                return 'This slug is reserved. Please choose a different one.';
+                                            }
+                                            return true;
+                                        }
+                                    })}
+                                />
+                                {errors.slug && (
+                                    <p className='text-red-500 text-sm mt-1'>{errors.slug.message as string}</p>
+                                )}
+                            </div>
+                            {/* Brand */}
+                            <div>
+                                <Input
+                                    label="Brand "
+                                    placeholder='Enter product brand'
+                                    {...register('brand')}
+                                />
+                                {errors.brand && (
+                                    <p className='text-red-500 text-sm mt-1'>{errors.brand.message as string}</p>
+                                )}
+                            </div>
+                            {/* Color Selector */}
+                            <ColorSelector control={control} errors={errors} />
+                            {/* Custom Specifications */}
+                            <CustomSpecifications control={control} errors={errors} />
+                            {/* Custom Properties */}
+                            <CustomProperties control={control} errors={errors} />
 
+                            {/* Cash on Delivery */}
+                            <div>
+                                <label className='block text-sm font-medium text-[var(--color-text)] mb-2'>Product Description *</label>
+                                <select
+                                    defaultValue="Please select a option"
+                                    className="select bg-surface-muted border-border w-full cursor-pointer"
+                                    {...register('cod', { required: 'Please select an option' })}
+                                >
+                                    <option disabled={true}>Please select a option</option>
+                                    <option value="yes">Yes</option>
+                                    <option value="no">No</option>
+                                </select>
+                                {errors.cod && (
+                                    <p className='text-red-500 text-sm mt-1'>{errors.cod.message as string}</p>
+                                )}
+                            </div>
+                        </div>
+                        {/* Form Right Inputs */}
+                        <div className='w-2/4 space-y-4'>
+                            {/* Category */}
+                            <div>
+                                <label className='block text-sm font-medium text-[var(--color-text)] mb-2'>Category *</label>
+                                <select
+                                    defaultValue="Please select a category"
+                                    className="select bg-surface-muted border-border w-full cursor-pointer"
+                                    {...register('category', { required: 'Please select a category' })}
+                                >
+                                    <option disabled={true}>Please select a category</option>
+                                    <option value="electronics">Electronics</option>
+                                    <option value="clothing">Clothing</option>
+                                    <option value="home">Home</option>
+                                </select>
+                                {errors.category && (
+                                    <p className='text-red-500 text-sm mt-1'>{errors.category.message as string}</p>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>

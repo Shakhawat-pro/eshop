@@ -30,7 +30,7 @@ npx prisma studio
 
 ```bash
 # Clear Nx cache
-nx reset
+npx nx reset
 
 # Run a specific app
 nx serve <app-name>
