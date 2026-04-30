@@ -1,7 +1,8 @@
+import DiscountCodePage from "@/components/page/DiscountCode/DiscountCodePage";
 import React from "react";
 
 const Page = () => {
-    return <div className="text-white text-2xl">Discount Codes Page</div>;
+    return <DiscountCodePage />;
 };
 
 export default Page;

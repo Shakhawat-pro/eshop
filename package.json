@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "dev:all": "npx nx run-many -t serve --all --configuration=development",
+    "nodemon:all": "concurrently -k -n api,auth,product \"npm run dev:api-gateway\" \"npm run dev:auth-service\" \"npm run dev:product-service\"",
+    "dev:all": "npx nx run-many -t serve --all --configuration=development --parallel",
     "dev": "npx nx run-many -t serve --projects=@eshop/api-gateway,@eshop/auth-service --configuration=development",
     "dev:ui": "npx nx run-many -t dev --projects=@eshop/user-ui,@eshop/seller-ui",
     "user-ui": "npx nx run @eshop/user-ui:dev",
@@ -19,7 +20,10 @@
     "build:auth-service": "nx build @eshop/auth-service --configuration=production",
     "prisma:generate": "npx prisma generate",
     "lint": "nx lint",
-    "test": "nx test"
+    "test": "nx test",
+    "dev:api-gateway": "concurrently -k -n build,serve \"npx nx build @eshop/api-gateway --configuration=development --watch\" \"nodemon --watch apps/api-gateway/dist --delay 200ms --exec node apps/api-gateway/dist/main.js\"",
+    "dev:auth-service": "concurrently -k -n build,serve \"npx nx build @eshop/auth-service --configuration=development --watch\" \"nodemon --watch apps/auth-service/dist --delay 200ms --exec node apps/auth-service/dist/main.js\"",
+    "dev:product-service": "concurrently -k -n build,serve \"npx nx build @eshop/product-service --configuration=development --watch\" \"nodemon --watch apps/product-service/dist --delay 200ms --exec node apps/product-service/dist/main.js\""
   },
   "private": true,
   "dependencies": {
@@ -47,6 +51,7 @@
     "react-hook-form": "^7.62.0",
     "react-hot-toast": "^2.6.0",
     "react-icons": "^5.5.0",
+    "react-quill-new": "^3.8.3",
     "stripe": "^18.5.0"
   },
   "devDependencies": {

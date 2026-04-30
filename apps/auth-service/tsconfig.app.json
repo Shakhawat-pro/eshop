@@ -12,7 +12,7 @@
     "src/**/*.ts",
     "../../packages/**/*.ts",
     "../../packages/components/Input/index.tsx"
-  ],
+, "../../packages/components/size-selector/index.tsx"  ],
   "exclude": [
     "out-tsc",
     "dist",

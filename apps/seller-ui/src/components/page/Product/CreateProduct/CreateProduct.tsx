@@ -1,21 +1,51 @@
 "use client";
 import BreadCrumbAndHeader from '@/components/Shared/BreadCrumbAndHeader';
 import ImagePlaceHolder from '@/components/Shared/ImagePlaceHolder/ImagePlaceHolder';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import Input from '../../../../../../../packages/components/Input/Index';
 import ColorSelector from '../../../../../../../packages/components/color-selector';
 import CustomSpecifications from '../../../../../../../packages/components/custom-specifications';
 import CustomProperties from '../../../../../../../packages/components/custom-properties';
+import { useQuery } from '@tanstack/react-query';
+import axiosInstance from '@/utils/axiosInstance';
+import RichTextEditor from '../../../../../../../packages/components/RichTextEditor';
+import SizeSelector from '../../../../../../../packages/components/size-selector';
 
 const CreateProduct = () => {
+    const { register, control, watch, setValue, handleSubmit, formState: { errors }, } = useForm()
+
     const [openImageModal, setOpenImageModal] = useState(false);
-    const [isChanged, setIsChanged] = useState(false);
+    const [isChanged, setIsChanged] = useState(true);
     const [images, setImages] = useState<(File | null)[]>([null]);
     const [loading, setLoading] = useState(false);
 
-    const { register, control, watch, setValue, handleSubmit, formState: { errors }, } = useForm()
+    const { data, isLoading, error: categoriesError } = useQuery({
+        queryKey: ['categories'],
+        queryFn: async () => {
+            try {
+                const res = await axiosInstance.get('/product/api/get-categories');
+                return res.data;
+            } catch (error) {
+                console.error('Error fetching categories:', error);
+                // throw error;
+            }
+        },
+        staleTime: 1000 * 60 * 5, // 5 minutes
+        retry: 2,
+    })
+
+    const categories = data?.categories || [];
+    const subCategories = data?.subCategories || {};
+
+    const selectedCategory = watch('category');
+    const selectedSubCategories = useMemo(() => {
+        return selectedCategory ? subCategories[selectedCategory] || [] : [];
+    }, [selectedCategory, subCategories]);
+
+    console.log(selectedCategory, "selected")
+
 
     const onSubmit = (data: any) => {
         console.log(data);
@@ -51,11 +81,15 @@ const CreateProduct = () => {
         });
     }
 
+    const handleSaveDraft = () => {
+        // Implement save draft functionality here
+    }
+
 
     return (
         <div>
             {/* BreadCrumb And Header */}
-            <BreadCrumbAndHeader title="Create Product" breadcrumbs={[
+            <BreadCrumbAndHeader header="Create Product" breadcrumbs={[
                 { name: "Dashboard", href: "/dashboard" },
                 { name: "Products", href: "/dashboard/products" },
                 { name: "Create Product" }
@@ -199,7 +233,7 @@ const CreateProduct = () => {
 
                             {/* Cash on Delivery */}
                             <div>
-                                <label className='block text-sm font-medium text-[var(--color-text)] mb-2'>Product Description *</label>
+                                <label className='block text-sm font-medium text-[var(--color-text)] mb-1'>Product Description *</label>
                                 <select
                                     defaultValue="Please select a option"
                                     className="select bg-surface-muted border-border w-full cursor-pointer"
@@ -218,23 +252,190 @@ const CreateProduct = () => {
                         <div className='w-2/4 space-y-4'>
                             {/* Category */}
                             <div>
-                                <label className='block text-sm font-medium text-[var(--color-text)] mb-2'>Category *</label>
-                                <select
-                                    defaultValue="Please select a category"
-                                    className="select bg-surface-muted border-border w-full cursor-pointer"
-                                    {...register('category', { required: 'Please select a category' })}
-                                >
-                                    <option disabled={true}>Please select a category</option>
-                                    <option value="electronics">Electronics</option>
-                                    <option value="clothing">Clothing</option>
-                                    <option value="home">Home</option>
-                                </select>
+                                <label className='block text-sm font-medium text-[var(--color-text)] mb-1'>Category *</label>
+                                <Controller
+                                    name="category"
+                                    control={control}
+                                    rules={{ required: "Please select a category" }}
+                                    render={({ field }) => (
+                                        <select
+                                            {...field}
+                                            className="select bg-surface-muted border-border w-full cursor-pointer"
+                                        >
+                                            <option value="" disabled>
+                                                {isLoading ? "Loading..." : "Please select a category"}
+                                            </option>
+
+                                            {categories.map((category: string) => (
+                                                <option key={category} value={category}>
+                                                    {category}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    )}
+                                />
+                                {categoriesError && (
+                                    <p className='text-red-500 text-sm mt-1'>Error loading categories</p>
+                                )}
                                 {errors.category && (
                                     <p className='text-red-500 text-sm mt-1'>{errors.category.message as string}</p>
                                 )}
                             </div>
+                            {/* Sub Category */}
+                            <div>
+                                <label className='block text-sm font-medium text-[var(--color-text)] mb-1'>Sub Category *</label>
+                                <Controller
+                                    name="subCategory"
+                                    control={control}
+                                    rules={{ required: "Please select a sub category" }}
+                                    render={({ field }) => (
+                                        <select
+                                            defaultValue=""
+                                            {...field}
+                                            disabled={!selectedCategory}
+                                            className="select bg-surface-muted border-border w-full cursor-pointer"
+                                        >
+                                            <option value="" disabled>
+                                                {!selectedCategory
+                                                    ? "Select category first"
+                                                    : "Please select a sub category"}
+                                            </option>
+
+                                            {selectedSubCategories.map((sub: string) => (
+                                                <option key={sub} value={sub}>
+                                                    {sub}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    )}
+                                />
+                                {errors.subCategory && (
+                                    <p className='text-red-500 text-sm mt-1'>{errors.subCategory.message as string}</p>
+                                )}
+                            </div>
+                            {/* Detail Description */}
+                            <div>
+                                <label className='block text-sm font-medium text-[var(--color-text)] mb-1'>Detail Description * (Min 100 words)</label>
+                                <Controller
+                                    name="detail_description"
+                                    control={control}
+                                    rules={{
+                                        required: "Please enter a detail description",
+                                        validate: (value) => {
+                                            const wordCount = value.split(/\s+/).filter((word: string) => word.length > 0).length;
+                                            return wordCount >= 100 || `Detail description must be at least 100 words (Current: ${wordCount})`;
+                                        }
+                                    }}
+                                    render={({ field }) => (
+                                        <RichTextEditor
+                                            value={field.value || ''}
+                                            onChange={field.onChange}
+                                            placeholder="Enter detailed description of the product"
+                                        />
+                                    )}
+                                />
+                                {errors.detail_description && (
+                                    <p className='text-red-500 text-sm mt-1'>{errors.detail_description.message as string}</p>
+                                )}
+                            </div>
+                            {/* video url */}
+                            <div>
+                                <Input
+                                    label="Video URL"
+                                    placeholder='https://www.youtube.com/watch?v=example'
+                                    {...register('video_url', {
+                                        pattern: {
+                                            value: /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+$/,
+                                            message: 'Please enter a valid YouTube URL! (e.g., https://www.youtube.com/watch?v=example or https://youtu.be/example)'
+                                        }
+                                    })}
+                                />
+                                {errors.video_url && (
+                                    <p className='text-red-500 text-sm mt-1'>{errors.video_url.message as string}</p>
+                                )}
+                            </div>
+                            {/* Regular Price */}
+                            <div>
+                                <Input
+                                    type='number'
+                                    label="Regular Price"
+                                    placeholder='20$'
+                                    {...register('regular_price', {
+                                        valueAsNumber: true,
+                                        min: { value: 1, message: 'Price must be at least $1' },
+                                        validate: (value) => {
+                                            if (isNaN(value)) return 'Please enter a valid number for the price';
+                                            return true;
+                                        }
+                                    })}
+                                />
+                                {errors.regular_price && (
+                                    <p className='text-red-500 text-sm mt-1'>{errors.regular_price.message as string}</p>
+                                )}
+                            </div>
+                            {/* Sale Price */}
+                            <div>
+                                <Input
+                                    label="Sale Price *"
+                                    placeholder='15$'
+                                    {...register('sale_price', {
+                                        min: { value: 1, message: 'Price must be at least $1' },
+                                        valueAsNumber: true,
+                                        validate: (value) => {
+                                            if (isNaN(value)) return 'Please enter a valid number for the price';
+                                            const regularPrice = parseFloat(watch('regular_price'));
+                                            if (regularPrice && value >= regularPrice) {
+                                                return 'Sale price must be less than regular price';
+                                            }
+                                            return true;
+                                        }
+                                    })}
+                                />
+                                {errors.sale_price && (
+                                    <p className='text-red-500 text-sm mt-1'>{errors.sale_price.message as string}</p>
+                                )}
+                            </div>
+                            {/* Stock Quantity */}
+                            <div>
+                                <Input
+                                    type='number'
+                                    label="Stock Quantity"
+                                    placeholder='Enter stock quantity'
+                                    {...register('stock_quantity', {
+                                        valueAsNumber: true,
+                                        min: { value: 0, message: 'Stock quantity must be a positive number' },
+                                        max: { value: 1000, message: 'Stock quantity cannot exceed 1,000' },
+                                        validate: (value) => {
+                                            if (isNaN(value)) return 'Please enter a valid number for the stock quantity';
+                                            if (!Number.isInteger(value)) return 'Stock quantity must be an whole number';
+                                            return true;
+                                        }
+                                    })}
+                                />
+                                {errors.stock_quantity && (
+                                    <p className='text-red-500 text-sm mt-1'>{errors.stock_quantity.message as string}</p>
+                                )}
+                            </div>
+                            {/* Size Selector */}
+                            <SizeSelector control={control} error={errors} />
                         </div>
                     </div>
+                </div>
+                <div className='mt-6 flex justify-end gap-3'>
+                    {isChanged && (
+                        <button
+                            type='button'
+                            onClick={handleSaveDraft}
+                            className='px-4 py-2 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition cursor-pointer'
+                        > Save Draft
+                        </button>
+                    )}
+                    <button
+                        type='submit'
+                        onClick={handleSubmit(onSubmit)}
+                        className='px-4 py-2 rounded-md border border-[var(--color-accent)] bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hover)] transition cursor-pointer'
+                    > Create
+                    </button>
                 </div>
             </form>
         </div>
