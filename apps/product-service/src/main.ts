@@ -17,7 +17,7 @@ app.use(express.json())
 app.use(cookieParser())
 
 app.get('/', (req, res) => {
-    res.send({ 'message': 'Welcome to the Product Service abc' });
+    res.send({ 'message': 'Welcome to the Product Service' });
 });
 
 
