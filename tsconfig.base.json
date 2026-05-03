@@ -6,6 +6,8 @@
     "emitDeclarationOnly": true,
     "importHelpers": true,
     "isolatedModules": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "lib": [
       "es2022"
     ],
