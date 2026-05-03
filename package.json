@@ -28,9 +28,9 @@
     "prisma:generate": "npx prisma generate",
     "lint": "nx lint",
     "test": "nx test",
-    "dev:api-gateway": "concurrently -k -n build,serve \"npx nx run @eshop/api-gateway:build:development --watch\" \"nodemon --watch apps/api-gateway/dist --delay 200ms --exec \\\"node apps/api-gateway/dist/main.js\\\"\"",
-    "dev:auth-service": "concurrently -k -n build,serve \"npx nx run @eshop/auth-service:build:development --watch\" \"nodemon --watch apps/auth-service/dist --delay 200ms --exec \\\"node apps/auth-service/dist/main.js\\\"\"",
-    "dev:product-service": "concurrently -k -n build,serve \"npx nx run @eshop/product-service:build:development --watch\" \"nodemon --watch apps/product-service/dist --delay 200ms --exec \\\"node apps/product-service/dist/main.js\\\"\""
+    "dev:api-gateway": "concurrently -k -n build,serve \"nx build @eshop/api-gateway --configuration=development --watch\" \"nodemon --watch apps/api-gateway/dist --delay 200ms apps/api-gateway/dist/main.js\"",
+    "dev:auth-service": "concurrently -k -n build,serve \"nx build @eshop/auth-service --configuration=development --watch\" \"nodemon --watch apps/auth-service/dist --delay 200ms apps/auth-service/dist/main.js\"",
+    "dev:product-service": "concurrently -k -n build,serve \"nx build @eshop/product-service --configuration=development --watch\" \"nodemon --watch apps/product-service/dist --delay 200ms apps/product-service/dist/main.js\""
   },
   "private": true,
   "dependencies": {
