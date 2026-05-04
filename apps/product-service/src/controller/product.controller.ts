@@ -52,11 +52,9 @@ export const getDiscountCodes = async (req: any, res: Response, next: NextFuncti
                 sellerId: req.seller?.id
             }
         });
+        // console.log(discount_codes ,"discount_codes log")
 
-        return res.status(200).json({
-            status: true,
-            discount_codes
-        });
+        return res.status(200).json({ discount_codes });
 
     } catch (error) {
         return next(error);

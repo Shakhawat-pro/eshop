@@ -11,9 +11,9 @@ const isAuthenticated = async (req: any, res: Response, next: NextFunction) => {
             req.cookies["seller_access_token"] ||
             req.headers.authorization?.split(" ")[1];
 
-        console.log("Token found:", token);
-        console.log("cookies", req.cookies);
-        console.log("header", req.headers);
+        // console.log("Token found:", token);
+        // console.log("cookies", req.cookies);
+        // console.log("header", req.headers);
 
         if (!token) {
             return res.status(401).json({ susses: false, message: "Unauthorized! Token missing." });
