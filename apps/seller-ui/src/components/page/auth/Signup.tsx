@@ -172,7 +172,7 @@ const Signup = () => {
 
 
     return (
-        <div className="w-full py-10 flex flex-col items-center  min-h-screen px-4 ">
+        <div className="w-full py-10 flex flex-col items-center  min-h-screen px-4 text-black">
             {/* Stepper */}
             <div className="relative w-full max-w-3xl mx-auto mb-8 px-4 md:px-8 ">
                 <div className="flex items-center justify-between relative">

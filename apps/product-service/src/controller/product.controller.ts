@@ -32,7 +32,7 @@ export const createDiscountCodes = async (req: any, res: Response, next: NextFun
             data: {
                 public_name,
                 discountType,
-                discountValue,
+                discountValue: parseFloat(discountValue), // Ensure it's stored as a number
                 discountCode,
                 sellerId: req.seller?.id
             }

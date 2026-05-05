@@ -42,7 +42,13 @@ const isAuthenticated = async (req: any, res: Response, next: NextFunction) => {
         }
         if (!account) return res.status(404).json({ susses: false, message: "Account not found." });
 
-        req.user = account;
+        // req.user = account;
+        if (decoded.role === "user") {
+            req.user = account;
+        }
+        else if (decoded.role === "seller") {
+            req.seller = account;
+        }
         req.role = decoded.role;
 
         return next();

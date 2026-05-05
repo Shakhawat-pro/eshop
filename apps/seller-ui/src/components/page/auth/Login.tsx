@@ -43,7 +43,7 @@ const Login = () => {
     };
 
     return (
-        <div className="w-full py-10 min-h-screen bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl flex flex-col gap-4 items-center justify-center">
+        <div className="w-full py-10 min-h-screen bg-gradient-to-r from-gray-50 to-gray-100  flex flex-col gap-4 items-center justify-center">
             <div className="text-center space-y-3">
                 <h1 className="text-4xl text-gray-900 font-bold">Login</h1>
                 <p className="text-gray-600 font-semibold">Home . Login</p>
@@ -76,7 +76,7 @@ const Login = () => {
                                     message: "Invalid email address"
                                 }
                             })}
-                            className="mt-1 w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="mt-1 w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 text-gray-700 border-gray-400! focus:ring-blue-500"
                         />
                         {errors.email && (
                             <p className="text-red-500 text-sm mt-1">
@@ -98,7 +98,7 @@ const Login = () => {
                                     required: "Password is required",
                                     minLength: { value: 6, message: "Password must be at least 6 characters long" }
                                 })}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 text-gray-700 border-gray-400! focus:ring-blue-500 text-grey-900!"
                             />
                             <button
                                 type="button"
@@ -117,12 +117,12 @@ const Login = () => {
 
                     {/* Remember Me + Forgot Password */}
                     <div className="flex items-center justify-between text-sm">
-                        <label className="flex items-center gap-2">
+                        <label className="flex items-center gap-2 text-gray-700">
                             <input
                                 type="checkbox"
                                 checked={rememberMe}
                                 onChange={() => setRememberMe(!rememberMe)}
-                                className="rounded"
+                                className="checkbox rounded-md! checkbox-sm checkbox-neutral"
                             />
                             Remember me
                         </label>

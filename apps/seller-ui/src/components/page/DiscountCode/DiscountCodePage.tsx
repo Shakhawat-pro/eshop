@@ -1,38 +1,23 @@
 "use client";
 import BreadCrumbAndHeader from '@/components/Shared/BreadCrumbAndHeader';
 import DataTable from '@/components/Shared/DataTable/DataTable';
+import Modal from '@/components/Shared/Modal/Modal';
 import axiosInstance from '@/utils/axiosInstance';
-import { useQuery } from '@tanstack/react-query';
-import { Plus } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Delete, Plus } from 'lucide-react';
 import React, { useState } from 'react';
+import { toast } from 'sonner';
+import CreateCodeModal from './CreateCodeModal';
+import DeleteModal from '@/components/Shared/Modal/DeleteModal';
 
-const dummyData = [
-    {
-        id: 1,
-        public_name: "Summer Sale",
-        discountType: "Percentage",
-        discountValue: 20,
-        discountCode: "SUMMER20"
-    },
-    {
-        id: 2,
-        public_name: "Holiday Discount",
-        discountType: "Fixed Amount",
-        discountValue: 10,
-        discountCode: "HOLIDAY10"
-    },
-    {
-        id: 3,
-        public_name: "Black Friday Deal",
-        discountType: "Percentage",
-        discountValue: 50,
-        discountCode: "BLACKFRIDAY50"
-    }
-];
 
 
 const DiscountCodePage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [selectedCode, setSelectedCode] = useState<any | null>(null);
+
+    const queryClient = useQueryClient();
 
     const { data: discountCodes = [], isLoading } = useQuery({
         queryKey: ['discount_codes'],
@@ -44,11 +29,36 @@ const DiscountCodePage = () => {
 
     console.log(discountCodes, "discount codes data log")
 
+    const deleteMutation = useMutation({
+        mutationFn: async (id: number) => {
+            await axiosInstance.delete(`/product/api/delete-discount-code/${id}`);
+        },
+        onSuccess: () => {
+            toast.success("Discount code deleted successfully");
+            queryClient.invalidateQueries({ queryKey: ['discount_codes'] });
+        },
+        onError: (error: any) => {
+            const errorMessage = error?.response?.data?.message || "Failed to delete discount code";
+            toast.error(errorMessage);
+        }
+    });
+
+    const handleDelete = (id: number) => {
+        deleteMutation.mutate(id);
+    }
+
+
 
     const columns = [
         { header: "Title", accessor: "public_name" },
-        { header: "Type", accessor: "discountType" },
-        { header: "Value", accessor: "discountValue" },
+        { header: "Type", accessor: "discountType", cell: (row: any) => <p className='capitalize'>{row?.discountType}</p> },
+        {
+            header: "Value", accessor: "discountValue", cell: (row: any) => (
+                <span>
+                    {row?.discountType === "percentage" ? `${row?.discountValue}%` : `$${row?.discountValue.toFixed(2)}`}
+                </span>
+            )
+        },
         {
             header: "Code",
             accessor: "discountCode",
@@ -64,12 +74,22 @@ const DiscountCodePage = () => {
             cell: (row: any) => (
                 <div className="flex gap-2">
                     <button className="text-blue-600 hover:underline">Edit</button>
-                    <button className="text-red-600 hover:underline">Delete</button>
+                    <button className="text-red-600 hover:underline" onClick={() => {
+                        setSelectedCode(row);
+                        setIsDeleteModalOpen(true);
+                    }}>
+                        Delete
+                    </button>
                 </div>
             )
 
         }
     ];
+
+
+
+
+
 
 
     return (
@@ -94,21 +114,38 @@ const DiscountCodePage = () => {
             </div>
             {/* Main Content */}
             <div className='mt-8 bg-surface p-6 rounded-lg border border-border blue-shadow-sm'>
-                <h1>Your Discount Codes</h1>
+                <h1>Your Discount Codes: {discountCodes.length}</h1>
                 <DataTable
-                    data={dummyData}
+                    data={discountCodes}
                     columns={columns}
                     loading={isLoading}
                 />
             </div>
 
             {/* Create Discount Code Modal */}
-            <div className={`fixed inset-0 z-50 flex items-center justify-center bg-[#00000059] bg-opacity-50 transition-opacity ${isModalOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-                <div className="bg-white rounded-lg p-6 w-full max-w-md">
-                    <h2 className="text-xl font-semibold mb-4">Create Discount Code</h2>
-                    {/* Form fields for creating a discount code */}
-                </div>
-            </div>
+            <Modal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                ariaLabelledBy="create-discount-title"
+            >
+                <CreateCodeModal
+                    queryClient={queryClient}
+                    discountCodesLength={discountCodes?.length || 0}
+                    onClose={() => setIsModalOpen(false)}
+                />
+            </Modal>
+            <DeleteModal
+                title="Delete Discount Code"
+                message={`Are you sure you want to delete "${selectedCode?.discountCode}"?`}
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={() => {
+                    if (selectedCode !== null) {
+                        handleDelete(selectedCode.id);
+                    }
+                    setIsDeleteModalOpen(false);
+                }}
+            />
         </div>
     );
 };

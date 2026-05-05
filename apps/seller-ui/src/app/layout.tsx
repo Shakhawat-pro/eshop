@@ -1,6 +1,7 @@
 import './global.css';
 import { Poppins } from "next/font/google";
 import Providers from './providers';
+import ReactToaster from '@/components/Shared/ReactToaster';
 
 export const metadata = {
   title: 'E-shop Seller',
@@ -21,6 +22,7 @@ export default function RootLayout({
     <html lang="en" data-theme="night">
       <body className={` font-sans antialiased  font-poppins ${poppins.variable}`}>
         <Providers>
+          <ReactToaster />
           {children}
         </Providers>
       </body>

@@ -3,8 +3,9 @@ import { forwardRef } from 'react';
 
 interface BaseProps {
     label?: string;
-    type?: 'text' | "number" | "password" | "email" | 'textarea';
+    type?: 'text' | "number" | "password" | "email" | 'textarea' | "date" | "time" | "datetime-local";
     className?: string
+    error?: string;
 }
 
 type InputProps = BaseProps & React.InputHTMLAttributes<HTMLInputElement>;
@@ -35,7 +36,7 @@ const Input = forwardRef<HTMLInputElement | HTMLTextAreaElement, Props>(
                         {...(props as InputProps)}
                     />
                 )}
-
+                {props.error && <p className='mt-1 text-xs text-red-500'>{props.error}</p>}                
             </div>
         )
     }
