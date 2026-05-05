@@ -12,6 +12,7 @@ import { useQuery } from '@tanstack/react-query';
 import axiosInstance from '@/utils/axiosInstance';
 import RichTextEditor from '../../../../../../../packages/components/RichTextEditor';
 import SizeSelector from '../../../../../../../packages/components/size-selector';
+import { useDiscountCodes } from '@/queries/discount.queries';
 
 const CreateProduct = () => {
     const { register, control, watch, setValue, handleSubmit, formState: { errors }, } = useForm()
@@ -36,6 +37,8 @@ const CreateProduct = () => {
         retry: 2,
     })
 
+    const { data: discountCodes = [], isLoading: isDiscountCodesLoading } = useDiscountCodes();
+
     const categories = data?.categories || [];
     const subCategories = data?.subCategories || {};
 
@@ -45,6 +48,8 @@ const CreateProduct = () => {
     }, [selectedCategory, subCategories]);
 
     console.log(selectedCategory, "selected")
+
+    const selectedDiscountCodes = watch('discountCodes') || [];
 
 
     const onSubmit = (data: any) => {
@@ -84,6 +89,8 @@ const CreateProduct = () => {
     const handleSaveDraft = () => {
         // Implement save draft functionality here
     }
+
+    // console.log(watch('discountCodes'))
 
 
     return (
@@ -419,6 +426,50 @@ const CreateProduct = () => {
                             {/* Size Selector */}
                             <SizeSelector control={control} error={errors} />
                             {/* Discount Code */}
+                            <div className="mt-3 rounded-xl border border-border bg-linear-to-br from-surface via-surface-muted to-surface-strong p-4 shadow-[0_10px_30px_rgba(0,0,0,0.35)]">
+                                <div className='flex items-center justify-between gap-3'>
+                                    <div>
+                                        <label className='block text-sm font-semibold tracking-wide text-text'>Discount Code</label>
+                                        <p className='mt-1 text-xs text-text-muted'>Apply one or more active discounts.</p>
+                                    </div>
+                                    <span className='rounded-full border border-border bg-surface-muted px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest text-text'>
+                                        {selectedDiscountCodes.length > 0 ? `${selectedDiscountCodes.length} selected` : 'optional'}
+                                    </span>
+                                </div>
+                                <div className='mt-4 flex flex-wrap gap-2'>
+                                    {isDiscountCodesLoading ? (
+                                        <p className='text-sm text-text-muted'>Loading discount codes...</p>
+                                    ) : discountCodes.length === 0 ? (
+                                        <p className='text-sm text-text-muted'>No discount codes available.</p>
+                                    ) : (
+                                        discountCodes.map((discount: any) => {
+                                            const isSelected = selectedDiscountCodes.includes(discount.id);
+                                            return (
+                                                <button
+                                                    key={discount.id}
+                                                    type='button'
+                                                    aria-pressed={isSelected}
+                                                    onClick={() => {
+                                                        if (isSelected) {
+                                                            setValue('discountCodes', selectedDiscountCodes.filter((id: number) => id !== discount.id));
+                                                        } else {
+                                                            setValue('discountCodes', [...selectedDiscountCodes, discount.id]);
+                                                        }
+                                                    }}
+                                                    className={`rounded-md border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] transition cursor-pointer ${isSelected
+                                                            ? 'border-accent bg-accent text-white shadow-[0_2px_20px_rgba(59,130,246,0.35)]'
+                                                            : 'border-border bg-surface text-text hover:border-accent hover:text-accent'
+                                                        }`}
+                                                >
+                                                    {discount.public_name} ({discount.discountValue}
+                                                    {discount.discount_type === 'percentage' ? '%' : '$'})
+                                                </button>
+                                            );
+                                        })
+                                    )}
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -427,14 +478,14 @@ const CreateProduct = () => {
                         <button
                             type='button'
                             onClick={handleSaveDraft}
-                            className='px-4 py-2 rounded-md border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-surface-muted)] hover:border-[var(--color-accent)] hover:text-[var(--color-accent)] transition cursor-pointer'
+                            className='px-4 py-2 rounded-md border border-border bg-surface text-text hover:bg-surface-muted hover:border-accent hover:text-accent transition cursor-pointer'
                         > Save Draft
                         </button>
                     )}
                     <button
                         type='submit'
                         onClick={handleSubmit(onSubmit)}
-                        className='px-4 py-2 rounded-md border border-[var(--color-accent)] bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hover)] transition cursor-pointer'
+                        className='px-4 py-2 rounded-md border border-accent bg-accent text-white hover:bg-accent-hover transition cursor-pointer'
                     > Create
                     </button>
                 </div>
