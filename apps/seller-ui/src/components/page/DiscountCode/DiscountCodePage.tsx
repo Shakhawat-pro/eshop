@@ -2,13 +2,12 @@
 import BreadCrumbAndHeader from '@/components/Shared/BreadCrumbAndHeader';
 import DataTable from '@/components/Shared/DataTable/DataTable';
 import Modal from '@/components/Shared/Modal/Modal';
-import axiosInstance from '@/utils/axiosInstance';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Delete, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import CreateCodeModal from './CreateCodeModal';
 import DeleteModal from '@/components/Shared/Modal/DeleteModal';
+import { useDeleteDiscountCode, useDiscountCodes } from '@/queries/discount.queries';
 
 
 
@@ -17,34 +16,18 @@ const DiscountCodePage = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedCode, setSelectedCode] = useState<any | null>(null);
 
-    const queryClient = useQueryClient();
 
-    const { data: discountCodes = [], isLoading } = useQuery({
-        queryKey: ['discount_codes'],
-        queryFn: async () => {
-            const response = await axiosInstance.get('/product/api/get-discount-codes');
-            return response.data.discount_codes;
-        }
-    });
+    const { data: discountCodes = [], isLoading } = useDiscountCodes();
 
-    console.log(discountCodes, "discount codes data log")
 
-    const deleteMutation = useMutation({
-        mutationFn: async (id: number) => {
-            await axiosInstance.delete(`/product/api/delete-discount-code/${id}`);
-        },
-        onSuccess: () => {
-            toast.success("Discount code deleted successfully");
-            queryClient.invalidateQueries({ queryKey: ['discount_codes'] });
-        },
-        onError: (error: any) => {
-            const errorMessage = error?.response?.data?.message || "Failed to delete discount code";
-            toast.error(errorMessage);
-        }
-    });
+    const deleteMutation = useDeleteDiscountCode();
 
     const handleDelete = (id: number) => {
-        deleteMutation.mutate(id);
+        deleteMutation.mutate(id, {
+            onSuccess: () => {
+                toast.success("Discount code deleted successfully");
+            }
+        })
     }
 
 
@@ -88,10 +71,6 @@ const DiscountCodePage = () => {
 
 
 
-
-
-
-
     return (
         <div className='w-full min-h-screen '>
             <div className='flex items-center justify-between'>
@@ -129,14 +108,13 @@ const DiscountCodePage = () => {
                 ariaLabelledBy="create-discount-title"
             >
                 <CreateCodeModal
-                    queryClient={queryClient}
                     discountCodesLength={discountCodes?.length || 0}
                     onClose={() => setIsModalOpen(false)}
                 />
             </Modal>
             <DeleteModal
                 title="Delete Discount Code"
-                message={`Are you sure you want to delete "${selectedCode?.discountCode}"?`}
+                value={selectedCode?.public_name}
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={() => {

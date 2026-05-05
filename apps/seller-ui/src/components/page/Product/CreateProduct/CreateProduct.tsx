@@ -418,6 +418,7 @@ const CreateProduct = () => {
                             </div>
                             {/* Size Selector */}
                             <SizeSelector control={control} error={errors} />
+                            {/* Discount Code */}
                         </div>
                     </div>
                 </div>

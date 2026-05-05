@@ -1,13 +1,11 @@
 "use client";
-import axiosInstance from '@/utils/axiosInstance';
-import { useMutation } from '@tanstack/react-query';
 import React from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { toast } from 'sonner';
 import Input from '../../../../../../packages/components/Input/Index';
 import { AxiosError } from 'axios';
+import { useCreateDiscountCode } from '@/queries/discount.queries';
 
-const CreateCodeModal = ({ queryClient, discountCodesLength, onClose }: { queryClient: any; discountCodesLength: number; onClose: () => void }) => {
+const CreateCodeModal = ({ discountCodesLength, onClose }: { discountCodesLength: number; onClose: () => void }) => {
 
     const { register, handleSubmit, control, reset, formState: { errors }, watch, setValue } = useForm({
         defaultValues: {
@@ -21,29 +19,19 @@ const CreateCodeModal = ({ queryClient, discountCodesLength, onClose }: { queryC
         }
     })
 
-    const createDiscountCodeMutation = useMutation({
-        mutationFn: async (data: any) => {
-            const response = await axiosInstance.post('/product/api/create-discount-codes', data);
-            return response;
-        },
-        onSuccess: (data) => {
-            toast.success("Discount code created successfully!");
-            // Optionally, you can invalidate the query to refetch the discount codes
-            queryClient.invalidateQueries({ queryKey: ['discount_codes'] });
-            reset();
-            onClose();
-        },
-        onError: (error: any) => {
-            toast.error(error?.response?.data?.error || "Failed to create discount code.");
-        }
-    });
+    const createDiscountCodeMutation = useCreateDiscountCode();
 
 
     const onSubmit = (data: any) => {
         if (discountCodesLength >= 8) {
             return alert("You can only create up to 8 discount codes.");
         }
-        createDiscountCodeMutation.mutate(data);
+        createDiscountCodeMutation.mutate(data, {
+            onSuccess: () => {
+                reset();
+                onClose();
+            }
+        });
 
     }
 
