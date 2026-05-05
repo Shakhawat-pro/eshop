@@ -47,7 +47,7 @@ const CreateProduct = () => {
         return selectedCategory ? subCategories[selectedCategory] || [] : [];
     }, [selectedCategory, subCategories]);
 
-    console.log(selectedCategory, "selected")
+    // console.log(selectedCategory, "selected")
 
     const selectedDiscountCodes = watch('discountCodes') || [];
 
@@ -56,34 +56,57 @@ const CreateProduct = () => {
         console.log(data);
     }
 
-    const handleImageChange = (file: File | null, index: number) => {
-        const updatedImages = [...images];
-        updatedImages[index] = file;
+    const convertFileToBase64 = (file: File) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = (error) => reject(error);
+        })
+    };
 
-        if (index === images.length - 1 && file) {
-            updatedImages.push(null);
+    const handleImageChange = async (file: File | null, index: number) => {
+        if (!file) return;
+
+        try {
+            const fileName = await convertFileToBase64(file);
+            // console.log(base64)
+            const response = await axiosInstance.post('/product/api/upload-product-image', fileName);
+
+            const updateImages = [...images];
+            updateImages[index] = response.data.file_name;
+
+            if (index === images.length - 1 && updateImages.length < 8) {
+                updateImages.push(null);
+            }
+
+            setImages(updateImages);
+            setValue('images', updateImages);
+        } catch (error) {
+
         }
-
-        setImages(updatedImages);
-        // setValue('images', updatedImages.filter(img => img !== null));
-        setValue('images', updatedImages);
     }
 
     const handleRemoveImage = (index: number) => {
-        setImages((prevImages) => {
-            const updatedImages = [...prevImages];
+        try {
+            const updateImages = [...images];
 
-            if (index === -1) {
-                updatedImages[0] = null;
-            } else {
-                updatedImages.splice(index, 1);
+            const imageToDelete = updateImages[index];
+            if (imageToDelete && typeof imageToDelete === 'string') {
+                // Call API to delete the image from the server
             }
-            if (!updatedImages.includes(null) && updatedImages.length < 8) {
-                updatedImages.push(null);
+
+            updateImages.splice(index, 1);
+
+            if (!updateImages.includes(null) && updateImages.length < 8) {
+                updateImages.push(null);
             }
-            setValue('images', updatedImages);
-            return updatedImages;
-        });
+
+            setValue('images', updateImages);
+            setImages(updateImages);
+        } catch (error) {
+            console.error('Error removing image:', error);
+        }
     }
 
     const handleSaveDraft = () => {
@@ -106,7 +129,7 @@ const CreateProduct = () => {
                 {/* Content Layout */}
                 <div className='py-4 w-full flex gap-6'>
                     {/* Left Side - Image upload Section */}
-                    <div className='md:w-[35%] flex '>
+                    <div className='md:w-[35%] flex flex-col gap-4 '>
                         {images?.length > 0 &&
                             <ImagePlaceHolder
                                 size="765 x 850"
@@ -457,8 +480,8 @@ const CreateProduct = () => {
                                                         }
                                                     }}
                                                     className={`rounded-md border px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] transition cursor-pointer ${isSelected
-                                                            ? 'border-accent bg-accent text-white shadow-[0_2px_20px_rgba(59,130,246,0.35)]'
-                                                            : 'border-border bg-surface text-text hover:border-accent hover:text-accent'
+                                                        ? 'border-accent bg-accent text-white shadow-[0_2px_20px_rgba(59,130,246,0.35)]'
+                                                        : 'border-border bg-surface text-text hover:border-accent hover:text-accent'
                                                         }`}
                                                 >
                                                     {discount.public_name} ({discount.discountValue}
