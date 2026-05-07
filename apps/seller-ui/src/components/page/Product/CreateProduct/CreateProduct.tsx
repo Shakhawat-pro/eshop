@@ -69,9 +69,12 @@ const CreateProduct = () => {
         if (!file) return;
 
         try {
-            const fileName = await convertFileToBase64(file);
+            // const fileName = await convertFileToBase64(file);
             // console.log(base64)
-            const response = await axiosInstance.post('/product/api/upload-product-image', fileName);
+            const formData = new FormData();
+            formData.append("image", file);
+
+            const response = await axiosInstance.post('/product/api/upload-product-image', formData);
 
             const updateImages = [...images];
             updateImages[index] = response.data.file_name;

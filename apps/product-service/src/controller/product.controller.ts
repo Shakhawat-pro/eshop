@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import prisma from "../../../../packages/libs/prisma";
 import { ValidationError } from "../../../../packages/error-handler";
+import { imagekitClient } from "../../../../packages/libs/imageKit";
 
 // get product Categories
 export const getCategories = async (req: Request, res: Response, next: NextFunction) => {
@@ -101,6 +102,39 @@ export const deleteDiscountCode = async (req: any, res: Response, next: NextFunc
         });
 
     } catch (error) {
+        return next(error);
+    }
+}
+
+// upload product images
+export const uploadProductImage = async (req: any, res: Response, next: NextFunction) => {
+    try {
+        const file = req.file;
+        if (!file) {
+            return next(new ValidationError("Image file is required"));
+        }
+
+        // return res.status(200).json({
+        //     message: "Image upload endpoint hit successfully",
+        //     file_name: req.file.originalname
+        // });
+
+        console.log(file.originalname, "file name log")
+        const base64 = file.buffer.toString("base64");
+
+        console.log(base64, "base64")
+
+
+        const response = await imagekitClient.files.upload({
+            file: base64,
+            fileName: `product-images/${Date.now()}.jpg`,
+            folder: "/products"
+        });
+
+        res.status(200).json({ file_name: response.url });
+
+    } catch (error) {
+        console.log(error, "errorI")
         return next(error);
     }
 }
