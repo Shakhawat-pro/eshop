@@ -77,6 +77,10 @@ const CreateProduct = () => {
             const response = await axiosInstance.post('/product/api/upload-product-image', formData);
 
             const updateImages = [...images];
+            const uploadedImage = {
+                fileId: response.data.fileId,
+                file_url: response.data.file_url
+            }
             updateImages[index] = response.data.file_name;
 
             if (index === images.length - 1 && updateImages.length < 8) {

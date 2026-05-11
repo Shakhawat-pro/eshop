@@ -122,7 +122,7 @@ export const uploadProductImage = async (req: any, res: Response, next: NextFunc
         console.log(file.originalname, "file name log")
         const base64 = file.buffer.toString("base64");
 
-        console.log(base64, "base64")
+        // console.log(base64, "base64")
 
 
         const response = await imagekitClient.files.upload({
@@ -131,7 +131,10 @@ export const uploadProductImage = async (req: any, res: Response, next: NextFunc
             folder: "/products"
         });
 
-        res.status(200).json({ file_name: response.url });
+        res.status(200).json({
+            file_url: response.url,
+            fileId: response.fileId
+        });
 
     } catch (error) {
         console.log(error, "errorI")

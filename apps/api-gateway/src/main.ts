@@ -6,7 +6,8 @@ import rateLimit from 'express-rate-limit';
 // import axios from 'axios';
 import cookieParser from 'cookie-parser';
 import { ipKeyGenerator } from 'express-rate-limit';
-
+import { Request, Response } from 'express';
+import initializeSiteConfig from './libs/initializeSiteConfig';
 
 const app = express();
 app.use(cors({
@@ -15,8 +16,7 @@ app.use(cors({
   credentials: true,
 }))
 app.use(morgan("dev"))
-app.use(express.json({ limit: "100mb" }))
-app.use(express.urlencoded({ limit: "100mb", extended: true }))
+
 app.use(cookieParser())
 app.set("trust proxy", 1)
 
@@ -32,20 +32,20 @@ const limiter = rateLimit({
 
 app.use(limiter)
 
-import { Request, Response } from 'express';
-import initializeSiteConfig from './libs/initializeSiteConfig';
+
 
 app.get('/gateway-health', (req: Request, res: Response) => {
   res.send({ message: 'Welcome to api-gateway!' });
 });
 
 app.use("/product", proxy("http://localhost:6002", {
-  parseReqBody: false,
+  // parseReqBody: false,
+  limit: "100mb",
 }))
-app.use("/", proxy("http://localhost:6001", {
-  parseReqBody: false,
-}))
+app.use("/", proxy("http://localhost:6001"))
 
+app.use(express.json({ limit: "100mb" }))
+app.use(express.urlencoded({ limit: "100mb", extended: true }))
 
 
 const port = process.env.PORT || 8080;
