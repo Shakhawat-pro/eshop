@@ -13,13 +13,20 @@ import axiosInstance from '@/utils/axiosInstance';
 import RichTextEditor from '../../../../../../../packages/components/RichTextEditor';
 import SizeSelector from '../../../../../../../packages/components/size-selector';
 import { useDiscountCodes } from '@/queries/discount.queries';
+import Modal from '@/components/Shared/Modal/Modal';
+
+interface UploadedImage {
+    fileId: string;
+    file_url: string;
+}
 
 const CreateProduct = () => {
     const { register, control, watch, setValue, handleSubmit, formState: { errors }, } = useForm()
 
-    const [openImageModal, setOpenImageModal] = useState(false);
+    const [openImageModal, setOpenImageModal] = useState(true);
+    const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
     const [isChanged, setIsChanged] = useState(true);
-    const [images, setImages] = useState<(File | null)[]>([null]);
+    const [images, setImages] = useState<(UploadedImage | null)[]>([null]);
     const [loading, setLoading] = useState(false);
 
     const { data, isLoading, error: categoriesError } = useQuery({
@@ -81,7 +88,7 @@ const CreateProduct = () => {
                 fileId: response.data.fileId,
                 file_url: response.data.file_url
             }
-            updateImages[index] = response.data.file_name;
+            updateImages[index] = uploadedImage;
 
             if (index === images.length - 1 && updateImages.length < 8) {
                 updateImages.push(null);
@@ -94,13 +101,18 @@ const CreateProduct = () => {
         }
     }
 
-    const handleRemoveImage = (index: number) => {
+    const handleRemoveImage = async (index: number) => {
         try {
             const updateImages = [...images];
 
             const imageToDelete = updateImages[index];
-            if (imageToDelete && typeof imageToDelete === 'string') {
+            if (imageToDelete && typeof imageToDelete === 'object') {
                 // Call API to delete the image from the server
+                await axiosInstance.delete('/product/api/delete-product-image', {
+                    data: {
+                        fileId: imageToDelete.fileId
+                    }
+                });
             }
 
             updateImages.splice(index, 1);
@@ -520,7 +532,18 @@ const CreateProduct = () => {
                     </button>
                 </div>
             </form>
+
+            <Modal
+                isOpen={openImageModal}
+                onClose={() => setOpenImageModal(false)}
+                ariaLabelledBy="upload-image-title"
+            >
+                <div className='p-6'>
+                </div>
+            </Modal>
         </div>
+
+
     );
 };
 

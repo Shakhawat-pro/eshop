@@ -1,6 +1,6 @@
 import { Router } from "express";
 import multer from "multer";
-import { createDiscountCodes, deleteDiscountCode, getCategories, getDiscountCodes, uploadProductImage } from "../controller/product.controller";
+import { createDiscountCodes, deleteDiscountCode, deleteProductImage, getCategories, getDiscountCodes, uploadProductImage } from "../controller/product.controller";
 import isAuthenticated from "../../../../packages/middleware/isAuthenticated";
 import { isSeller } from "../../../../packages/middleware/authorizeRoles";
 
@@ -19,6 +19,7 @@ router.delete("/delete-discount-code/:id", isAuthenticated, deleteDiscountCode);
 
 // Product Images
 router.post("/upload-product-image", isAuthenticated, upload.single("image"), uploadProductImage);
+router.delete("/delete-product-image", isAuthenticated, deleteProductImage);
 
 
 export default router;
