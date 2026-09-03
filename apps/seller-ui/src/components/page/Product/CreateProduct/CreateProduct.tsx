@@ -14,20 +14,32 @@ import RichTextEditor from '../../../../../../../packages/components/RichTextEdi
 import SizeSelector from '../../../../../../../packages/components/size-selector';
 import { useDiscountCodes } from '@/queries/discount.queries';
 import Modal from '@/components/Shared/Modal/Modal';
+import Image from 'next/image';
+import { enhanceImageWithAI } from '@/utils/AI.enhancement';
+import { WandSparklesIcon } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 interface UploadedImage {
     fileId: string;
     file_url: string;
 }
 
+const getTextFromHTML = (html: string) => {
+    if (!html) return '';
+    return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+};
+
 const CreateProduct = () => {
+    const router = useRouter();
     const { register, control, watch, setValue, handleSubmit, formState: { errors }, } = useForm()
 
-    const [openImageModal, setOpenImageModal] = useState(true);
-    const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+    const [openImageModal, setOpenImageModal] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [isChanged, setIsChanged] = useState(true);
+    const [activeEffect, setActiveEffect] = useState<string | null>(null);
     const [images, setImages] = useState<(UploadedImage | null)[]>([null]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState<{ index: number; action: 'upload' | 'delete'| 'submit' } | null>(null);
 
     const { data, isLoading, error: categoriesError } = useQuery({
         queryKey: ['categories'],
@@ -59,8 +71,19 @@ const CreateProduct = () => {
     const selectedDiscountCodes = watch('discountCodes') || [];
 
 
-    const onSubmit = (data: any) => {
+    const onSubmit = async (data: any) => {
         console.log(data);
+
+        try {
+            setLoading({ index: 0, action: 'submit' });
+            await axiosInstance.post('/product/api/create-product', { ...data });
+            router.push('/dashboard/products');
+        } catch (error) {
+            console.error('Error creating product:', error);
+            toast.error('Failed to create product. Please try again.');
+        } finally {
+            setLoading(null);
+        }
     }
 
     const convertFileToBase64 = (file: File) => {
@@ -72,10 +95,11 @@ const CreateProduct = () => {
         })
     };
 
-    const handleImageChange = async (file: File | null, index: number) => {
+    const handleImageChange = async (file: File | null, index: number, previewUrl?: string | null) => {
         if (!file) return;
 
         try {
+            setLoading({ index, action: 'upload' });
             // const fileName = await convertFileToBase64(file);
             // console.log(base64)
             const formData = new FormData();
@@ -96,13 +120,21 @@ const CreateProduct = () => {
 
             setImages(updateImages);
             setValue('images', updateImages);
+            if (previewUrl) {
+                setSelectedImage(previewUrl);
+            } else if (response.data.file_url) {
+                setSelectedImage(response.data.file_url);
+            }
         } catch (error) {
-
+            console.error('Error uploading image:', error);
+        } finally {
+            setLoading(null);
         }
     }
 
     const handleRemoveImage = async (index: number) => {
         try {
+            setLoading({ index, action: 'delete' });
             const updateImages = [...images];
 
             const imageToDelete = updateImages[index];
@@ -115,7 +147,7 @@ const CreateProduct = () => {
                 });
             }
 
-            updateImages.splice(index, 1);
+            updateImages[index] = null;
 
             if (!updateImages.includes(null) && updateImages.length < 8) {
                 updateImages.push(null);
@@ -125,6 +157,8 @@ const CreateProduct = () => {
             setImages(updateImages);
         } catch (error) {
             console.error('Error removing image:', error);
+        } finally {
+            setLoading(null);
         }
     }
 
@@ -144,17 +178,21 @@ const CreateProduct = () => {
                 { name: "Create Product" }
             ]} />
 
-            <form>
+            <form onSubmit={handleSubmit(onSubmit)}>
                 {/* Content Layout */}
                 <div className='py-4 w-full flex gap-6'>
                     {/* Left Side - Image upload Section */}
                     <div className='md:w-[35%] flex flex-col gap-4 '>
                         {images?.length > 0 &&
                             <ImagePlaceHolder
+                                images={images}
                                 size="765 x 850"
                                 small={false}
                                 index={0}
+                                loading={loading?.index === 0}
+                                loadingText={loading?.action === 'delete' ? 'Deleting...' : 'Uploading...'}
                                 setOpenImageModal={setOpenImageModal}
+                                setSelectedImage={setSelectedImage}
                                 onImageChange={handleImageChange}
                                 onRemove={handleRemoveImage}
                             />
@@ -162,11 +200,15 @@ const CreateProduct = () => {
                         <div className='grid grid-cols-2 gap-3 mt-4 '>
                             {images.slice(1).map((_, index) => (
                                 <ImagePlaceHolder
+                                    images={images}
                                     key={index + 1}
                                     size="765 x 850"
                                     small={true}
                                     index={index + 1}
+                                    loading={loading?.index === index + 1}
+                                    loadingText={loading?.action === 'delete' ? 'Deleting...' : 'Uploading...'}
                                     setOpenImageModal={setOpenImageModal}
+                                    setSelectedImage={setSelectedImage}
                                     onImageChange={handleImageChange}
                                     onRemove={handleRemoveImage}
                                 />
@@ -196,16 +238,16 @@ const CreateProduct = () => {
                                     cols={10}
                                     label="Short Description *(Max 150 words)"
                                     placeholder='Enter Product description for quick overview'
-                                    {...register('description', {
-                                        required: 'Description is required',
+                                    {...register('short_description', {
+                                        required: 'Short description is required',
                                         validate: (value) => {
                                             const wordCount = value.trim().split(/\s+/).length;
                                             return wordCount <= 150 || `Description cannot exceed 150 words (Current: ${wordCount})`;
                                         }
                                     })}
                                 />
-                                {errors.description && (
-                                    <p className='text-red-500 text-sm mt-1'>{errors.description.message as string}</p>
+                                {errors.short_description && (
+                                    <p className='text-red-500 text-sm mt-1'>{errors.short_description.message as string}</p>
                                 )}
                             </div>
                             {/* Tag */}
@@ -282,18 +324,18 @@ const CreateProduct = () => {
 
                             {/* Cash on Delivery */}
                             <div>
-                                <label className='block text-sm font-medium text-[var(--color-text)] mb-1'>Product Description *</label>
+                                <label className='block text-sm font-medium text-[var(--color-text)] mb-1'>Cash on Delivery *</label>
                                 <select
                                     defaultValue="Please select a option"
                                     className="select bg-surface-muted border-border w-full cursor-pointer"
-                                    {...register('cod', { required: 'Please select an option' })}
+                                    {...register('cash_on_delivery', { required: 'Please select an option' })}
                                 >
                                     <option disabled={true}>Please select a option</option>
                                     <option value="yes">Yes</option>
                                     <option value="no">No</option>
                                 </select>
-                                {errors.cod && (
-                                    <p className='text-red-500 text-sm mt-1'>{errors.cod.message as string}</p>
+                                {errors.cash_on_delivery && (
+                                    <p className='text-red-500 text-sm mt-1'>{errors.cash_on_delivery.message as string}</p>
                                 )}
                             </div>
                         </div>
@@ -371,8 +413,13 @@ const CreateProduct = () => {
                                     rules={{
                                         required: "Please enter a detail description",
                                         validate: (value) => {
-                                            const wordCount = value.split(/\s+/).filter((word: string) => word.length > 0).length;
-                                            return wordCount >= 100 || `Detail description must be at least 100 words (Current: ${wordCount})`;
+                                            const text = new DOMParser()
+                                                .parseFromString(value || '', 'text/html')
+                                                .body.textContent || '';
+
+                                            const charCount = text.replace(/\s/g, '').length;
+
+                                            return charCount >= 100 || `Detail description must be at least 100 characters (Current: ${charCount})`;
                                         }
                                     }}
                                     render={({ field }) => (
@@ -504,7 +551,7 @@ const CreateProduct = () => {
                                                         }`}
                                                 >
                                                     {discount.public_name} ({discount.discountValue}
-                                                    {discount.discount_type === 'percentage' ? '%' : '$'})
+                                                    {discount.discountType === 'percentage' ? '%' : '$'})
                                                 </button>
                                             );
                                         })
@@ -535,10 +582,40 @@ const CreateProduct = () => {
 
             <Modal
                 isOpen={openImageModal}
-                onClose={() => setOpenImageModal(false)}
+                onClose={() => {
+                    setOpenImageModal(false);
+                    // setSelectedImage(null);
+                }}
                 ariaLabelledBy="upload-image-title"
             >
                 <div className='p-6'>
+                    {selectedImage && (
+                        <Image
+                            src={selectedImage}
+                            alt='Selected Image'
+                            width={500}
+                            height={500}
+                            className='object-contain max-h-[80vh] w-full rounded-md'
+                        />
+                    )}
+                    {selectedImage && (
+                        <div className='mt-4 space-y-2'>
+                            <h3>Ai Enhancement</h3>
+                            <div className='grid grid-cols-2 gap-3'>
+                                {enhanceImageWithAI.map((option) => (
+                                    <button
+                                        key={option.effect}
+                                        className={`px-4 py-2 rounded-md border border-border bg-surface text-text hover:bg-surface-muted hover:border-accent hover:text-accent transition cursor-pointer
+                                            ${activeEffect === option.effect ? 'border-accent bg-accent text-white shadow-[0_2px_20px_rgba(59,130,246,0.35)]' : ''}                                            
+                                            `}
+                                    >
+                                        <WandSparklesIcon className='inline-block mr-2' />
+                                        {option.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </Modal>
         </div>

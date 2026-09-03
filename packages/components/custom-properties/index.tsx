@@ -8,13 +8,13 @@ const CustomProperties = ({ control, errors }: any) => {
     const [newLabel, setNewLabel] = useState('');
     const [newValues, setNewValues] = useState<Record<number, string>>({});
 
-    console.log(newValues[1])
+    // console.log(newValues[1])
 
     return (
         <div className="">
             <div className="flex flex-col gap-6">
                 <Controller
-                    name={`customProperties`}
+                    name={`custom_properties`}
                     control={control}
                     rules={{ required: 'Property Name Is Required' }}
                     render={({ field }) => {
@@ -178,9 +178,9 @@ const CustomProperties = ({ control, errors }: any) => {
                                     </div>
                                 </div>
 
-                                {errors?.customProperties && (
+                                {errors?.custom_properties && (
                                     <p className="mt-2 text-sm text-red-600">
-                                        {errors.customProperties.message ||
+                                        {errors.custom_properties.message ||
                                             'Please fix the errors in the properties.'}
                                     </p>
                                 )}

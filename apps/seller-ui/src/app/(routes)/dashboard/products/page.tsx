@@ -1,7 +1,8 @@
+import AllProducts from "@/components/page/Product/AllProducts/AllProduct";
 import React from "react";
 
 const Page = () => {
-    return <div className="text-white text-2xl">All Products Page</div>;
+    return <AllProducts />;
 };
 
 export default Page;

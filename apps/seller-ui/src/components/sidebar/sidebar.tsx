@@ -53,7 +53,7 @@ const SidebarWrapper = () => {
     const pathname = usePathname();
     const { seller } = useSeller();
 
-    console.log("Seller data in SidebarWrapper:", seller);
+    // console.log("Seller data in SidebarWrapper:", seller);
 
     // ✅ Correct dependency
     useEffect(() => {

@@ -13,21 +13,42 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model images {
-  id      String  @id @default(auto()) @map("_id") @db.ObjectId
+// Separate image models for each entity type.
+
+model UserImage {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
   file_id String
   url     String
-  userId  String? @unique @db.ObjectId
-  shopId  String? @unique @db.ObjectId
-  users   users?  @relation(fields: [userId], references: [id])
-  shops   shops?  @relation(fields: [shopId], references: [id])
+  // One‑to‑one relation with a user (avatar).
+  userId  String @unique @db.ObjectId
+  user    users  @relation(fields: [userId], references: [id])
+}
+
+model ShopImage {
+  id      String @id @default(auto()) @map("_id") @db.ObjectId
+  file_id String
+  url     String
+  // One‑to‑one relation with a shop (avatar).
+  shopId  String @unique @db.ObjectId
+  shop    shops  @relation(fields: [shopId], references: [id])
+}
+
+model ProductImage {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  file_id   String
+  url       String
+  // Many‑to‑one relation: a product can have many images.
+  productId String   @db.ObjectId
+  product   products @relation(fields: [productId], references: [id])
+
+  @@index([productId])
 }
 
 model users {
   id          String        @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   email       String        @unique
-  avatar      images?
+  avatar      UserImage?
   following   String[]
   password    String?
   createdAt   DateTime      @default(now())
@@ -52,7 +73,7 @@ model shops {
   name          String        @unique
   bio           String?
   category      String
-  avatar        images?
+  avatar        ShopImage?
   coverBanner   String?
   address       String
   opening_hours String?
@@ -64,6 +85,7 @@ model shops {
   sellers       sellers       @relation(fields: [sellerId], references: [id])
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+  products      products[]
 }
 
 model sellers {
@@ -99,4 +121,47 @@ model discount_codes {
   sellers       sellers  @relation(fields: [sellerId], references: [id])
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+}
+
+enum ProductStatus {
+  active
+  inactive
+  pending
+  draft
+  suspended
+}
+
+model products {
+  id                    String         @id @default(auto()) @map("_id") @db.ObjectId
+  title                 String
+  slug                  String         @unique
+  category              String
+  subCategory           String
+  short_description     String
+  detail_description    String
+  images                ProductImage[]
+  video_url             String?
+  tags                  String[]
+  brand                 String?
+  colors                String[]
+  sizes                 String[]
+  starting_date         DateTime?
+  ending_date           DateTime?
+  stock_quantity        Int
+  sale_price            Float
+  regular_price         Float
+  rating                Float          @default(0)
+  warranty              String?
+  custom_specifications Json?
+  custom_properties     Json?
+  cash_on_delivery      String?
+  discount_code         String[]
+  status                ProductStatus  @default(active)
+  isDeleted             Boolean        @default(false)
+  deletedAt             DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  shopId    String   @db.ObjectId
+  shops     shops    @relation(fields: [shopId], references: [id])
 }

@@ -160,3 +160,201 @@ export const deleteProductImage = async (req: any, res: Response, next: NextFunc
         next(error);
     }
 }
+
+// create product
+export const createProduct = async (req: any, res: Response, next: NextFunction) => {
+    try {
+        const {
+            title,
+            short_description,
+            detail_description,
+            warranty,
+            custom_specifications,
+            slug,
+            tags,
+            cash_on_delivery,
+            brand,
+            video_url,
+            category,
+            subCategory,
+            colors = [],
+            sizes = [],
+            discountCodes = [],
+            stock_quantity,
+            sale_price,
+            regular_price,
+            custom_properties = [],
+            images = [],
+        } = req.body;
+
+        const requiredFields = {
+            title,
+            short_description,
+            slug,
+            category,
+            subCategory,
+            stock_quantity,
+            sale_price,
+            regular_price,
+        };
+
+        const missingFields = Object.entries(requiredFields)
+            .filter(([_, value]) => value === undefined || value === null || value === "")
+            .map(([key]) => key);
+
+        if (!images?.length) {
+            missingFields.push("images");
+        }
+
+        if (missingFields.length) {
+            return next(new ValidationError(`Missing required fields: ${missingFields.join(", ")}`));
+        }
+
+        if (!req.seller?.id) {
+            return next(new ValidationError("Only sellers can create products"));
+        }
+
+        const shop = await prisma.shops.findUnique({
+            where: { sellerId: req.seller.id },
+        });
+
+        if (!shop) {
+            return next(new ValidationError("Shop not found for this seller"));
+        }
+
+        const slugChecking = await prisma.products.findUnique({
+            where: { slug }
+        });
+
+        if (slugChecking) {
+            return next(new ValidationError("Slug already exists"));
+        }
+
+        // ✅ clean image mapping
+        const imageRecords = images
+            .filter((img: any) => img?.fileId && img?.file_url)
+            .map((img: any) => ({
+                file_id: img.fileId,
+                url: img.file_url,
+            }));
+
+        const newProduct = await prisma.products.create({
+            data: {
+                title,
+                slug,
+                category,
+                subCategory,
+                short_description,
+                detail_description,
+                warranty,
+                video_url,
+                brand,
+                colors,
+                sizes,
+                cash_on_delivery,
+                custom_properties,
+                custom_specifications,
+
+                tags: Array.isArray(tags)
+                    ? tags
+                    : tags?.split(",").map((t: string) => t.trim()),
+
+                discount_code: discountCodes,
+
+                stock_quantity: Number(stock_quantity),
+                sale_price: Number(sale_price),
+                regular_price: Number(regular_price),
+
+                shopId: shop.id,
+
+                // ✅ IMPORTANT CHANGE (new model)
+                images: {
+                    create: imageRecords.map((img: any) => ({
+                        file_id: img.file_id,
+                        url: img.url,
+                    }))
+                },
+            },
+            include: {
+                images: true
+            }
+        });
+
+        return res.status(201).json({
+            success: true,
+            product: newProduct
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+};
+
+// get logged in seller products
+export const getShopProducts = async (req: any, res: Response, next: NextFunction) => {
+    try {
+        if (!req.seller?.id) {
+            return next(new ValidationError("Only sellers can access their products"));
+        }
+
+        const shopId = req.seller.shop.id;
+        const {
+            search,
+            status,
+            category,
+            sortBy = 'updatedAt',
+            sortOrder = 'desc',
+        } = req.query as Record<string, string>;
+
+        const whereBase = { shopId };
+
+        const whereFiltered = {
+            ...whereBase,
+            ...(status   && { status: { equals: status as any } }),
+            ...(category && { category: { equals: category, mode: 'insensitive' as const } }),
+            ...(search && {
+                OR: [
+                    { title:    { contains: search, mode: 'insensitive' as const } },
+                    { slug:     { contains: search, mode: 'insensitive' as const } },
+                    { category: { contains: search, mode: 'insensitive' as const } },
+                ],
+            }),
+        };
+
+        const allowedSortFields = ['updatedAt', 'createdAt', 'sale_price', 'stock_quantity', 'rating'] as const;
+        const safeSortBy = allowedSortFields.includes(sortBy as any) ? sortBy : 'updatedAt';
+        const safeSortOrder = sortOrder === 'asc' ? 'asc' : 'desc';
+
+        const [products, total, active, lowStock] = await prisma.$transaction([
+            prisma.products.findMany({
+                where: whereFiltered,
+                include: { images: true },
+                orderBy: { [safeSortBy]: safeSortOrder },
+            }),
+            prisma.products.count({ where: whereBase }),
+            prisma.products.count({ where: { ...whereBase, status: 'active' } }),
+            prisma.products.count({ where: { ...whereBase, stock_quantity: { lte: 5 } } }),
+        ]);
+
+        // Distinct categories from ALL shop products for the filter dropdown
+        const categoryAgg = await prisma.products.groupBy({
+            by: ['category'],
+            where: whereBase,
+        });
+        const categories = categoryAgg.map((c) => c.category);
+
+        const avgRating = products.length
+            ? parseFloat((products.reduce((sum, p) => sum + p.rating, 0) / products.length).toFixed(1))
+            : 0;
+
+        return res.status(200).json({
+            success: true,
+            products,
+            stats: { total, active, lowStock, avgRating },
+            meta: { categories },
+        });
+
+    } catch (error) {
+        return next(error);
+    }
+};
